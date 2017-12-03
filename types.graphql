@@ -24,8 +24,6 @@ type User @model {
   email: String! @isUnique
   password: String!
   sites: [Site!]! @relation (name: "SiteForUser")
-  articles: [Article!]! @relation (name: "ArticleFromUser")
-  jobs: [Job!]!  @relation (name: "JobFromUser")
 }
 
 # Site contains site's configurations for remote posting
@@ -35,7 +33,7 @@ type Site @model {
   type: SITE_TYPE!              @defaultValue(value: WORDPRESS)
   apiPath: String               # root path for calling the APIs
   token: String                 # site token/credential 
-  categories: [SiteCategory!]!  @relation (name: "CategoryMappingForSite")
+  categories: [CategoryMapping!]!  @relation (name: "CategoryMappingForSite")
   posts: [Post!]!               @relation (name: "PostinSite")
 
   user: User!                   @relation (name: "SiteForUser")
@@ -50,7 +48,7 @@ type CategoryMapping @model {
   categoryCode: String!         # Category's code in wordpress's site
   site: Site!                   @relation (name: "CategoryMappingForSite")
   category: Category!           @relation (name: "MappingToCategory")
-  limitPost: Interger!          # Maximum posts/day
+  limitPost: Int!               # Maximum posts/day
 
   createdAt: DateTime!          # read-only (managed by Graphcool)
   updatedAt: DateTime!          # read-only (managed by Graphcool)
@@ -60,6 +58,7 @@ type Post @model {
   id: ID! @isUnique
   url: String!                  # URL of posted article
   article: Article!             @relation (name: "ArticleInPost")
+  site: Site!                   @relation (name: "PostinSite")
   
   postDate: DateTime!           # Date for posting an article
   createdAt: DateTime!          # read-only (managed by Graphcool)
@@ -88,6 +87,7 @@ type Article @model {
   excerpt: String
   status: STATUS! @defaultValue(value: DRAFTING)
   job: Job @relation (name: "JobInArticle")
+  post: Post @relation (name: "ArticleInPost")
   createdAt: DateTime! # read-only (managed by Graphcool)
 }
 
