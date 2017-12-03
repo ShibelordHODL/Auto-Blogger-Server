@@ -41,14 +41,6 @@ functions:
     handler:
       code: src/email-password/loggedInUser.ts
 
-
-  fetchHTML:
-    handler:
-      code:
-        src: ./src/fetchHTML.ts
-    type: resolver
-    schema: ./src/fetchHTML.graphql
-
   extractArticle:
     handler:
       code:
@@ -69,13 +61,6 @@ functions:
         src: ./src/translate.ts
     type: resolver
     schema: ./src/translate.graphql
-  
-  # oneStopTranslate:
-  #   handler:
-  #     code:
-  #       src: ./src/oneStopTranslate.js
-  #   type: resolver
-  #   schema: ./src/oneStopTranslate.graphql
 
   processJob:
     handler:
