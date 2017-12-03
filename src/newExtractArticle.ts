@@ -14,25 +14,20 @@ interface Job {
   rawTitle: string
   rawArticle: string
   rawTranslate: string
-  user: User
   article: Article
 }
 
 interface Article {
   url: string
   title: string
-  user: User
   status: STATUS
   job: Job
-  publishedDate: Date
-  createdDate: Date
+  createdAt: Date
 }
 
 enum STATUS {
-  QUEUING = "QUEUING",
   EXTRACTING = "EXTRACTING",
   TRANSLATING = "TRANSLATING",
-  COMPLETE = "COMPLETE"
 }
 
 interface User {
@@ -55,10 +50,8 @@ export default async event => {
     const cleanHTML = await cleanPageHTML(extract.content);
     const articleData = {
       status: STATUS.TRANSLATING,
-      userId: job.user.id,
       url: job.url,
       publishedDate: extract.date_published,
-      createdDate: new Date(),
       images: [{
         source: extract.lead_image_url
       }]
@@ -104,8 +97,8 @@ async function updateJob(api: GraphQLClient, jobId: string, title: string, artic
   const mutation = `
     mutation insertExtractedData($jobId: ID!, $title: String, $articleData: JobarticleArticle, $rawArticle: String, $status: STATUS){
       updateJob(
-        rawTitle: $title,
         id: $jobId, 
+        rawTitle: $title,
         rawArticle: $rawArticle, 
         status: $status,
         article: $articleData
