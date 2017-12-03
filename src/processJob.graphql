@@ -1,0 +1,8 @@
+type processPayload {
+  id: ID
+  status: String
+}
+
+extend type Mutation {
+  process(limit: Int): [processPayload!]
+}

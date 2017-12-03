@@ -1,0 +1,4 @@
+targets:
+  prod: shared-us-west-2/cja8a9yp23kz80132nhoa4k7i
+  dev: local/cjaq0aaab000t0126tyvfbprs
+  default: dev

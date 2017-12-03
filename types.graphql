@@ -1,0 +1,86 @@
+# The following types define the data model of the example service
+# based on which the GraphQL API is generated
+
+enum STATUS {
+  QUEUING
+  EXTRACTING
+  TRANSLATING
+  COMPLETE
+}
+
+type Site @model {
+  id: ID! @isUnique
+  title: String
+  url: String
+  mediaapi: String
+  postapi: String
+  token: String
+}
+
+type Job @model {
+  id: ID! @isUnique
+  url: String!
+  status: STATUS! @defaultValue(value: EXTRACTING)
+  rawHTML: String
+  rawTitle: String
+  rawArticle: String
+  rawTranslate: String
+  user: User!  @relation (name: "JobFromUser")
+  article: Article @relation (name: "JobInArticle")
+}
+
+type Article @model {
+  id: ID! @isUnique
+  url: String
+  title: String
+  article: String
+  categories: [Category!]! @relation (name: "ArticleInCategory")
+  keywords: [Keyword!]! @relation (name: "ArticleInKeyword")
+  images: [Image!]! @relation (name: "ImageInArticle")
+  wordCount: Int
+  excerpt: String
+  publishedDate: DateTime
+  user:  User! @relation (name: "ArticleFromUser")
+  status: STATUS! @defaultValue(value: EXTRACTING)
+  job: Job @relation (name: "JobInArticle")
+  createdDate: DateTime
+}
+
+type Keyword @model {
+  id: ID! @isUnique
+  keyword: String 
+  articles: [Article!]! @relation (name: "ArticleInKeyword")
+}
+
+type Category @model {
+  id: ID! @isUnique
+  name: String
+  parent: Category @relation (name: "CategoryInParent")
+  articles: [Article!]! @relation (name: "ArticleInCategory")
+}
+
+type Image @model {
+  id: ID! @isUnique
+  source: String
+  gSRC: String
+  article: Article @relation (name: "ImageInArticle")
+}
+
+
+
+# added by email-password template: (please uncomment)
+type User @model {
+  # Required system field:
+  id: ID! @isUnique # read-only (managed by Graphcool)
+
+  # Optional system fields (remove if not needed):
+  createdAt: DateTime! # read-only (managed by Graphcool)
+  updatedAt: DateTime! # read-only (managed by Graphcool)
+
+  email: String! @isUnique
+  password: String!
+  articles: [Article!]! @relation (name: "ArticleFromUser")
+  jobs: [Job!]!  @relation (name: "JobFromUser")
+}
+
+

@@ -1,0 +1,9 @@
+type extractArticlePayload {
+  id: ID
+  status: String!
+  rawArticle: String
+}
+
+extend type Mutation {
+  extractArticle(jobId: ID!): extractArticlePayload
+}

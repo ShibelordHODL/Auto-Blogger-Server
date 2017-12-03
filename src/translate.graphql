@@ -1,0 +1,9 @@
+type translatePayload {
+  id: ID
+  status: String
+  rawTranslate: String
+}
+
+extend type Mutation {
+  translate(jobId: ID!): translatePayload!
+}

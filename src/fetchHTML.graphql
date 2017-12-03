@@ -1,0 +1,10 @@
+
+type fetchHTMLPayload {
+  id: ID
+  status: String!
+  rawHTML: String
+}
+
+extend type Mutation {
+  fetchHTML(jobId: ID!): fetchHTMLPayload
+}
