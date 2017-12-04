@@ -1,31 +1,8 @@
 import { fromEvent, FunctionEvent } from 'graphcool-lib'
 import { GraphQLClient } from 'graphql-request'
-import fetch from "node-fetch";
-import { translate } from './lib/utils'
-
-
-
-interface Job {
-  id: string
-  status: STATUS
-  rawTitle: string
-  rawArticle: string
-  rawTranslate: string
-  article: Article
-}
-
-interface Article {
-  id: string
-  title: string
-  article: string
-  status: STATUS
-}
-
-enum STATUS {
-  EXTRACTING = "EXTRACTING",
-  TRANSLATING = "TRANSLATING",
-  PUBLISHING = "PUBLISHING"
-}
+import { translate } from './lib/external-api/google'
+import { Job, STATUS } from './lib/interface'
+import { getJob } from './lib/graphUtils'
 
 interface EventData {
   jobId: string
@@ -39,7 +16,6 @@ export default async event => {
     const job: Job = await getJob(api, jobId)
     const data = job.rawTitle + "<z>" + job.rawArticle
     const returnData = await translate(data)
-    console.log(JSON.stringify(returnData));
     let article = returnData.data.translations[0].translatedText
     const seperatorIndex = article.indexOf("<z>")
     const title = article.slice(0, seperatorIndex)
@@ -58,28 +34,6 @@ export default async event => {
     return { error };
   }
 };
-
-async function getJob(api: GraphQLClient, id: string): Promise<Job> {
-  const query = `
-    query getJob($id: ID!) {
-      Job(id: $id) {
-        id
-        rawTitle
-        rawArticle
-        article {
-          id
-        }
-      }
-    }
-  `
-
-  const variables = {
-    id,
-  }
-
-  return api.request<{ Job: Job }>(query, variables)
-    .then(r => r.Job)
-}
 
 async function updateJob(api: GraphQLClient, jobId: string, articleId: string, title: string, rawTranslate: string, status: STATUS): Promise<Job> {
   const mutation = `

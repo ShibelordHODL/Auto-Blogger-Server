@@ -1,24 +1,7 @@
 import { fromEvent, FunctionEvent } from 'graphcool-lib'
 import { GraphQLClient } from 'graphql-request'
-
-interface User {
-  id: string
-}
-
-interface Job {
-  id: string
-  status: STATUS
-  rawHTML: string
-  rawArticle: string
-  rawTranslate: string
-  article: Article
-}
-
-interface Article {
-  id: string
-  title: string
-  status: STATUS
-}
+import { Job, Article, STATUS } from './lib/interface'
+import { getJobs } from './lib/graphUtils'
 
 interface EventData {
   limit: number
@@ -29,13 +12,6 @@ interface ProcessResponse {
   status: STATUS
 }
 
-enum STATUS {
-  DRAFTING = "DRAFTING",
-  EXTRACTING = "EXTRACTING",
-  TRANSLATING = "TRANSLATING",
-  PUBLISHING = "PUBLISHING",
-  COMPLETE = "COMPLETE"
-}
 
 export default async (event: FunctionEvent<EventData>) => {
   try {
@@ -73,23 +49,6 @@ export default async (event: FunctionEvent<EventData>) => {
   } catch (error) {
     return { error }
   }
-}
-
-async function getJobs(api: GraphQLClient): Promise<[Job]> {
-  const query = `
-  query getJobs{
-      allJobs(filter: {
-        status_not: COMPLETE
-      }) {
-        id
-        status
-      }
-    }
-  `
-  try {
-    return api.request<{ allJobs: [Job] }>(query)
-      .then(r => r.allJobs)
-  } catch (e) { throw (e) }
 }
 
 async function mutateExtractArticle(api: GraphQLClient, jobId: string): Promise<Job> {

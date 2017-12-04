@@ -1,25 +1,75 @@
-import 'url-search-params-polyfill';
-import { GOOGLE_TRANSLATE_API, GOOGLE_KEY, GOOGLE_TRANSLATE_TARGET_LANGUAGE } from "../config";
 
-export async function translate(rawArticle) {
-    // create header and body
-    const headers = {
-        'content-type': 'application/x-www-form-urlencoded'
-    };
-    const paramsObject: any = {
-        key: GOOGLE_KEY,
-        target: GOOGLE_TRANSLATE_TARGET_LANGUAGE,
-        format: 'html',
-        q: rawArticle
-    }
-    const params = new URLSearchParams(paramsObject);
-    // call the api
-    const fetchOption: object = {
-        method: "POST",
-        headers,
-        body: params
-    }
-    const response = await fetch(GOOGLE_TRANSLATE_API, fetchOption);
+import * as sanitizeHtml from 'sanitize-html'
 
-    return response.json();
+
+const sanitizeConfigs: Object = {
+    allowedTags: [
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'blockquote',
+        'p',
+        // 'a',
+        'ul',
+        'ol',
+        'nl',
+        'li',
+        'b',
+        'i',
+        'strong',
+        'em',
+        'strike',
+        'code',
+        'hr',
+        'br',
+        'table',
+        'thead',
+        'caption',
+        'tbody',
+        'tr',
+        'th',
+        'td',
+        'pre',
+        // 'title',
+        'img',
+        // 'html',
+        // 'head',
+        // 'meta',
+        // 'body',
+        'figure',
+        // 'article',
+        // 'link',
+        // 'nav',
+        // 'span',
+        // 'div'
+
+
+    ],
+    allowedAttributes: {
+        a: ['href', 'name', 'target', 'rel'],
+        // We don't currently allow img itself by default, but this
+        // would make sense if we did
+        img: ['src', 'alt'],
+        meta: ['*'],
+        // link: ['*'],
+        article: ['*'],
+        figure: ['*'],
+        // span: ['class'],
+        // div: ['class']
+    },
+    // Lots of these won't come up by default because we don't allow them
+    // selfClosing: ['br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta'],
+    // URL schemes we permit
+    allowedSchemes: ['http', 'https', 'ftp', 'mailto'],
+    allowedSchemesByTag: {},
+    allowProtocolRelative: true,
+};
+
+export function cleanPageHTML(d) {
+    // var sanitizeHtml = require('sanitize-html');
+    const c = sanitizeHtml(d, (sanitizeConfigs));
+    return c;
 }
