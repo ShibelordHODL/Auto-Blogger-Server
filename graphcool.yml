@@ -62,7 +62,7 @@ functions:
     type: resolver
     schema: ./src/translate.graphql
 
-  processJob:
+  process:
     handler:
       code:
         src: ./src/processJob.ts
