@@ -41,13 +41,6 @@ functions:
     handler:
       code: src/email-password/loggedInUser.ts
 
-  extractArticle:
-    handler:
-      code:
-        src: ./src/extractArticle.ts
-    type: resolver
-    schema: ./src/extractArticle.graphql
-
   newExtractArticle:
     handler:
       code:
