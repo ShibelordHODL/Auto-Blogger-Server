@@ -1,34 +1,8 @@
 import { fromEvent, FunctionEvent } from 'graphcool-lib'
 import { GraphQLClient } from 'graphql-request'
-import fetch from "node-fetch";
-import 'url-search-params-polyfill';
-
-import { GOOGLE_TRANSLATE_API, GOOGLE_KEY, GOOGLE_TRANSLATE_TARGET_LANGUAGE } from "./config";
-interface Job {
-  id: string
-  url: string
-  status: STATUS
-  rawTitle: string
-  rawArticle: string
-  rawTranslate: string
-  article: Article
-}
-
-interface Article {
-  id: string
-  url: string
-  title: string
-  article: string
-  status: STATUS
-  job: Job
-}
-
-enum STATUS {
-  QUEUING = "QUEUING",
-  EXTRACTING = "EXTRACTING",
-  TRANSLATING = "TRANSLATING",
-  COMPLETE = "COMPLETE"
-}
+import { translate } from './lib/external-api/google'
+import { Job, STATUS } from './lib/interface'
+import { getJob } from './lib/graphUtils'
 
 interface EventData {
   jobId: string
@@ -48,7 +22,7 @@ export default async event => {
     article = article.substring(seperatorIndex + 3, article.length)
 
     // return { error: { returnData } }
-    const updateResponse: Job = await updateJob(api, job.id, job.article.id, title, article, STATUS.COMPLETE)
+    const updateResponse: Job = await updateJob(api, job.id, job.article.id, title, article, STATUS.PUBLISHING)
     return {
       data: {
         id: updateResponse.id,
@@ -60,49 +34,6 @@ export default async event => {
     return { error };
   }
 };
-
-async function getJob(api: GraphQLClient, id: string): Promise<Job> {
-  const query = `
-    query getJob($id: ID!) {
-      Job(id: $id) {
-        id
-        rawTitle
-        rawArticle
-        article {
-          id
-        }
-      }
-    }
-  `
-
-  const variables = {
-    id,
-  }
-
-  return api.request<{ Job: Job }>(query, variables)
-    .then(r => r.Job)
-}
-
-async function translate(rawArticle) {
-  // create header and body
-  const headers = {
-    'content-type': 'application/x-www-form-urlencoded'
-  };
-  const params = new URLSearchParams({
-    key: GOOGLE_KEY,
-    target: GOOGLE_TRANSLATE_TARGET_LANGUAGE,
-    format: 'html',
-    q: rawArticle
-  });
-  // call the api
-  const response = await fetch(GOOGLE_TRANSLATE_API, {
-    method: "POST",
-    headers,
-    body: params
-  });
-
-  return response.json();
-}
 
 async function updateJob(api: GraphQLClient, jobId: string, articleId: string, title: string, rawTranslate: string, status: STATUS): Promise<Job> {
   const mutation = `

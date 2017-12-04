@@ -2,30 +2,76 @@
 # based on which the GraphQL API is generated
 
 enum STATUS {
-  QUEUING
+  DRAFTING
+  READY
   EXTRACTING
   TRANSLATING
+  PUBLISHING
   COMPLETE
+  CANCELLED
+}
+enum SITE_TYPE {
+  WORDPRESS
 }
 
+# added by email-password template: (please uncomment)
+type User @model {
+  # Required system field:
+  id: ID! @isUnique # read-only (managed by Graphcool)
+  createdAt: DateTime! # read-only (managed by Graphcool)
+  updatedAt: DateTime! # read-only (managed by Graphcool)
+
+  email: String! @isUnique
+  password: String!
+  sites: [Site!]! @relation (name: "SiteForUser")
+}
+
+# Site contains site's configurations for remote posting
 type Site @model {
   id: ID! @isUnique
-  title: String
-  url: String
-  mediaapi: String
-  postapi: String
-  token: String
+  title: String                 #ref name for the site
+  type: SITE_TYPE!              @defaultValue(value: WORDPRESS)
+  apiPath: String               # root path for calling the APIs
+  token: String                 # site token/credential 
+  categories: [CategoryMapping!]!  @relation (name: "CategoryMappingForSite")
+  posts: [Post!]!               @relation (name: "PostinSite")
+
+  user: User!                   @relation (name: "SiteForUser")
+  createdAt: DateTime!          # read-only (managed by Graphcool)
+  updatedAt: DateTime!          # read-only (managed by Graphcool)
+}
+
+# Category mapping from article's category to site's category
+type CategoryMapping @model {
+  id: ID! @isUnique
+  title: String                 # Site's name
+  categoryCode: String!         # Category's code in wordpress's site
+  site: Site!                   @relation (name: "CategoryMappingForSite")
+  category: Category!           @relation (name: "MappingToCategory")
+  limitPost: Int!               # Maximum posts/day
+
+  createdAt: DateTime!          # read-only (managed by Graphcool)
+  updatedAt: DateTime!          # read-only (managed by Graphcool)
+}
+
+type Post @model {
+  id: ID! @isUnique
+  url: String!                  # URL of posted article
+  article: Article!             @relation (name: "ArticleInPost")
+  site: Site!                   @relation (name: "PostinSite")
+  
+  postDate: DateTime!           # Date for posting an article
+  createdAt: DateTime!          # read-only (managed by Graphcool)
 }
 
 type Job @model {
   id: ID! @isUnique
   url: String!
-  status: STATUS! @defaultValue(value: EXTRACTING)
+  status: STATUS! @defaultValue(value: DRAFTING)
   rawHTML: String
   rawTitle: String
   rawArticle: String
   rawTranslate: String
-  user: User!  @relation (name: "JobFromUser")
   article: Article @relation (name: "JobInArticle")
 }
 
@@ -35,52 +81,39 @@ type Article @model {
   title: String
   article: String
   categories: [Category!]! @relation (name: "ArticleInCategory")
-  keywords: [Keyword!]! @relation (name: "ArticleInKeyword")
+  # keywords: [Keyword!]! @relation (name: "ArticleInKeyword")
   images: [Image!]! @relation (name: "ImageInArticle")
   wordCount: Int
   excerpt: String
-  publishedDate: DateTime
-  user:  User! @relation (name: "ArticleFromUser")
-  status: STATUS! @defaultValue(value: EXTRACTING)
+  status: STATUS! @defaultValue(value: DRAFTING)
   job: Job @relation (name: "JobInArticle")
-  createdDate: DateTime
+  post: Post @relation (name: "ArticleInPost")
+  publishedDate: DateTime!
+  createdAt: DateTime! # read-only (managed by Graphcool)
 }
 
-type Keyword @model {
-  id: ID! @isUnique
-  keyword: String 
-  articles: [Article!]! @relation (name: "ArticleInKeyword")
-}
+# type Keyword @model {
+#   id: ID! @isUnique
+#   keyword: String 
+#   articles: [Article!]! @relation (name: "ArticleInKeyword")
+# }
 
 type Category @model {
   id: ID! @isUnique
   name: String
   parent: Category @relation (name: "CategoryInParent")
   articles: [Article!]! @relation (name: "ArticleInCategory")
+  categoryMapping: [CategoryMapping!]! @relation (name: "MappingToCategory")
 }
 
 type Image @model {
   id: ID! @isUnique
   source: String
-  gSRC: String
-  article: Article @relation (name: "ImageInArticle")
+  article: Article! @relation (name: "ImageInArticle")
 }
 
 
 
-# added by email-password template: (please uncomment)
-type User @model {
-  # Required system field:
-  id: ID! @isUnique # read-only (managed by Graphcool)
 
-  # Optional system fields (remove if not needed):
-  createdAt: DateTime! # read-only (managed by Graphcool)
-  updatedAt: DateTime! # read-only (managed by Graphcool)
-
-  email: String! @isUnique
-  password: String!
-  articles: [Article!]! @relation (name: "ArticleFromUser")
-  jobs: [Job!]!  @relation (name: "JobFromUser")
-}
 
 

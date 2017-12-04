@@ -1,28 +1,7 @@
 import { fromEvent, FunctionEvent } from 'graphcool-lib'
 import { GraphQLClient } from 'graphql-request'
-
-interface User {
-  id: string
-}
-
-interface Job {
-  id: string
-  url: string
-  status: STATUS
-  rawHTML: string
-  rawArticle: string
-  rawTranslate: string
-  article: Article
-}
-
-interface Article {
-  id: string
-  url: string
-  title: string
-  user: User
-  status: STATUS
-  job: Job
-}
+import { Job, Article, STATUS } from './lib/interface'
+import { getJobs } from './lib/graphUtils'
 
 interface EventData {
   limit: number
@@ -33,12 +12,6 @@ interface ProcessResponse {
   status: STATUS
 }
 
-enum STATUS {
-  QUEUING = "QUEUING",
-  EXTRACTING = "EXTRACTING",
-  TRANSLATING = "TRANSLATING",
-  COMPLETE = "COMPLETE"
-}
 
 export default async (event: FunctionEvent<EventData>) => {
   try {
@@ -76,42 +49,6 @@ export default async (event: FunctionEvent<EventData>) => {
   } catch (error) {
     return { error }
   }
-}
-
-async function getJobs(api: GraphQLClient): Promise<[Job]> {
-  const query = `
-  query getJobs{
-      allJobs(filter: {
-        status_not: COMPLETE
-      }) {
-        id
-        status
-      }
-    }
-  `
-  try {
-    return api.request<{ allJobs: [Job] }>(query)
-      .then(r => r.allJobs)
-  } catch (e) { throw (e) }
-}
-
-async function mutateFetchHTML(api: GraphQLClient, jobId: string): Promise<Job> {
-  const query = `
-  mutation mutateFetchHTML($jobId: ID!) {
-    fetchHTML(jobId: $jobId) {
-    	id
-    	status
-      rawHTML
-    }
-  }
-  `
-
-  const variables = {
-    jobId,
-  }
-
-  return api.request<{ fetchHTML: Job }>(query, variables)
-    .then(r => r.fetchHTML)
 }
 
 async function mutateExtractArticle(api: GraphQLClient, jobId: string): Promise<Job> {
