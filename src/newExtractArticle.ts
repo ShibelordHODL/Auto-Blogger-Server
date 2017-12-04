@@ -30,10 +30,6 @@ enum STATUS {
   TRANSLATING = "TRANSLATING",
 }
 
-interface User {
-  id: string
-}
-
 interface EventData {
   jobId: string
 }
@@ -78,9 +74,6 @@ async function getJob(api: GraphQLClient, id: string): Promise<Job> {
       Job(id: $id) {
         id
         url
-        user {
-          id
-        }
       }
     }
   `
