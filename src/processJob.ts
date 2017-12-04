@@ -1,25 +1,24 @@
 import { fromEvent, FunctionEvent } from 'graphcool-lib'
 import { GraphQLClient } from 'graphql-request'
-import { Job, Article, STATUS } from './lib/interface'
 import { getJobs } from './lib/graphUtils'
+import { IArticle, IJob, STATUS } from './lib/interface'
 
-interface EventData {
+interface IEventData {
   limit: number
 }
 
-interface ProcessResponse {
+interface IProcessResponse {
   id: string
   status: STATUS
 }
 
-
-export default async (event: FunctionEvent<EventData>) => {
+export default async (event: FunctionEvent<IEventData>) => {
   try {
     const graphcool = fromEvent(event)
     const api = graphcool.api('simple/v1')
     const { limit } = event.data
-    const jobs: [Job] = await getJobs(api);
-    let returnResponse: ProcessResponse[] = []
+    const jobs: [IJob] = await getJobs(api)
+    const returnResponse: IProcessResponse[] = []
 
     if (jobs && jobs.length > 0) {
       for (let job of jobs) {
@@ -30,9 +29,9 @@ export default async (event: FunctionEvent<EventData>) => {
           job = await mutateTranslate(api, job.id)
         }
 
-        const response: ProcessResponse = {
+        const response: IProcessResponse = {
           id: job.id,
-          status: job.status
+          status: job.status,
         }
 
         returnResponse.push(response)
@@ -51,7 +50,7 @@ export default async (event: FunctionEvent<EventData>) => {
   }
 }
 
-async function mutateExtractArticle(api: GraphQLClient, jobId: string): Promise<Job> {
+async function mutateExtractArticle(api: GraphQLClient, jobId: string): Promise<IJob> {
 
   const query = `
   mutation mutateExtractArticle($jobId: ID!) {
@@ -67,12 +66,12 @@ async function mutateExtractArticle(api: GraphQLClient, jobId: string): Promise<
     jobId,
   }
   try {
-    return api.request<{ newExtractArticle: Job }>(query, variables)
-      .then(r => r.newExtractArticle)
+    return api.request<{ newExtractArticle: IJob }>(query, variables)
+      .then((r) => r.newExtractArticle)
   } catch (e) { throw (e) }
 }
 
-async function mutateTranslate(api: GraphQLClient, jobId: string): Promise<Job> {
+async function mutateTranslate(api: GraphQLClient, jobId: string): Promise<IJob> {
 
   const query = `
   mutation mutateTranslate($jobId: ID!) {
@@ -88,7 +87,7 @@ async function mutateTranslate(api: GraphQLClient, jobId: string): Promise<Job> 
     jobId,
   }
   try {
-    return api.request<{ translate: Job }>(query, variables)
-      .then(r => r.translate)
+    return api.request<{ translate: IJob }>(query, variables)
+      .then((r) => r.translate)
   } catch (e) { throw (e) }
 }
