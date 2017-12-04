@@ -88,6 +88,7 @@ type Article @model {
   status: STATUS! @defaultValue(value: DRAFTING)
   job: Job @relation (name: "JobInArticle")
   post: Post @relation (name: "ArticleInPost")
+  publishedDate: DateTime!
   createdAt: DateTime! # read-only (managed by Graphcool)
 }
 
