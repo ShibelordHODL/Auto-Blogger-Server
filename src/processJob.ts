@@ -7,7 +7,6 @@ interface User {
 
 interface Job {
   id: string
-  url: string
   status: STATUS
   rawHTML: string
   rawArticle: string
@@ -17,11 +16,8 @@ interface Job {
 
 interface Article {
   id: string
-  url: string
   title: string
-  user: User
   status: STATUS
-  job: Job
 }
 
 interface EventData {
@@ -34,9 +30,10 @@ interface ProcessResponse {
 }
 
 enum STATUS {
-  QUEUING = "QUEUING",
+  DRAFTING = "DRAFTING",
   EXTRACTING = "EXTRACTING",
   TRANSLATING = "TRANSLATING",
+  PUBLISHING = "PUBLISHING",
   COMPLETE = "COMPLETE"
 }
 
@@ -93,25 +90,6 @@ async function getJobs(api: GraphQLClient): Promise<[Job]> {
     return api.request<{ allJobs: [Job] }>(query)
       .then(r => r.allJobs)
   } catch (e) { throw (e) }
-}
-
-async function mutateFetchHTML(api: GraphQLClient, jobId: string): Promise<Job> {
-  const query = `
-  mutation mutateFetchHTML($jobId: ID!) {
-    fetchHTML(jobId: $jobId) {
-    	id
-    	status
-      rawHTML
-    }
-  }
-  `
-
-  const variables = {
-    jobId,
-  }
-
-  return api.request<{ fetchHTML: Job }>(query, variables)
-    .then(r => r.fetchHTML)
 }
 
 async function mutateExtractArticle(api: GraphQLClient, jobId: string): Promise<Job> {
