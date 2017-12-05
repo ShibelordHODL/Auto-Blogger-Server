@@ -14,15 +14,11 @@ export default async (event) => {
     const api = graphcool.api('simple/v1')
     const { jobId } = event.data
     const job: IJob = await getJob(api, jobId)
-    const data = job.rawTitle + '<z>' + job.rawArticle
-    const returnData = await translate(data)
-    let article = returnData.data.translations[0].translatedText
-    const seperatorIndex = article.indexOf('<z>')
-    const title = article.slice(0, seperatorIndex)
-    article = article.substring(seperatorIndex + 3, article.length)
+    const returnData = await translate(job.rawArticle)
+    const article = returnData.data.translations[0].translatedText
 
     // return { error: { returnData } }
-    const updateResponse: IJob = await updateJob(api, job.id, job.article.id, title, article, STATUS.PUBLISHING)
+    const updateResponse: IJob = await updateJob(api, job.id, job.article.id, article, STATUS.PUBLISHING)
     return {
       data: {
         id: updateResponse.id,
@@ -39,13 +35,12 @@ async function updateJob(
   api: GraphQLClient,
   jobId: string,
   articleId: string,
-  title: string,
   rawTranslate: string,
   status: STATUS,
 ): Promise<IJob> {
   const mutation = `
-    mutation insertExtractedData($jobId: ID!, $articleId: ID!, $title: String, $rawTranslate: String, $status: STATUS){
-      updateArticle(id: $articleId, title: $title, article: $rawTranslate, status: $status){
+    mutation insertExtractedData($jobId: ID!, $articleId: ID!, $rawTranslate: String, $status: STATUS){
+      updateArticle(id: $articleId, article: $rawTranslate, status: $status){
         id
         status
       }
@@ -61,7 +56,6 @@ async function updateJob(
     jobId,
     rawTranslate,
     status,
-    title,
   }
 
   return api.request<{ updateJob: IJob }>(mutation, variables)

@@ -4,7 +4,7 @@ import { translate } from './lib/external-api/google'
 import { extractArticle } from './lib/external-api/mercury'
 import { getJob } from './lib/graphUtils'
 import { IArticle, IJob, STATUS } from './lib/interface'
-import { cleanPageHTML, extractImages } from './lib/utils'
+import { cleanPageHTML, replaceImages } from './lib/utils'
 
 export interface IEventData {
   jobId: string
@@ -20,18 +20,20 @@ export default async (event) => {
 
     const extract = await extractArticle(url)
     const cleanHTML = await cleanPageHTML(extract.content)
-    const title = await translate(extract.title)
+    const replaceData = replaceImages(cleanHTML)
+    const titleData = await translate(extract.title)
     const articleData = {
-      images: [{
+      images: [...replaceData.images, {
+        ref: 'i_m',
         source: extract.lead_image_url,
       }],
       publishedDate: extract.date_published,
       status: STATUS.TRANSLATING,
-      title,
+      title: titleData.data.translations[0].translatedText,
       url: job.url,
     }
     // return { error: JSON.stringify(articleData) }
-    const updateResponse: IJob = await updateJob(api, jobId, articleData, cleanHTML, STATUS.TRANSLATING)
+    const updateResponse: IJob = await updateJob(api, jobId, articleData, replaceData.html, STATUS.READY)
     return {
       data: {
         id: updateResponse.id,

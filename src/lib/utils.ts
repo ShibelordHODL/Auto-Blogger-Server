@@ -1,4 +1,3 @@
-
 import * as sanitizeHtml from 'sanitize-html'
 
 const sanitizeConfigs: object = {
@@ -62,7 +61,31 @@ export function cleanPageHTML(d) {
   return c
 }
 
-export function extractImages(html) {
-  const regex = /(?<=<img src=").*?(?=")/gm
-  return html.match(regex)
+export function replaceImages(html) {
+  const cheerio = require('cheerio')
+  try {
+    const $ = cheerio.load(html, {
+      withDomLvl1: false,
+    })
+    const relativeLinks = $('img')
+    const images = []
+    let index = 1
+    for (const image of relativeLinks) {
+      const source = $(image).attr('src')
+      images.push({
+        ref: 'i_' + index,
+        source,
+      })
+      const replaceElement = $(`<img src="i_${index}">`)
+      index++
+      $(image).replaceWith(replaceElement)
+    }
+    return {
+      html: $('body').html(),
+      images,
+    }
+  } catch (error) {
+    throw (error)
+  }
+
 }
