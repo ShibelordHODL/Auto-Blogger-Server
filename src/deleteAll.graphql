@@ -1,0 +1,7 @@
+type deleteAllPayload {
+  id: ID
+}
+
+extend type Mutation {
+  deleteAll(table: String!, deleteList: [String!]): [deleteAllPayload!]
+}

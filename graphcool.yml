@@ -22,7 +22,7 @@ types: ./types.graphql
 functions:
 
 # added by email-password template: (please uncomment)
-# 
+#
   signup:
     type: resolver
     schema: src/email-password/signup.graphql
@@ -62,9 +62,16 @@ functions:
     type: resolver
     schema: ./src/processJob.graphql
 
-    
+  deleteAll:
+    handler:
+      code:
+        src: ./src/deleteAll.ts
+    type: resolver
+    schema: ./src/deleteAll.graphql
 
-  
+
+
+
 
 
 # Model/Relation permissions are used to limit the API access
