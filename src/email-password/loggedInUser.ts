@@ -1,13 +1,11 @@
 import { fromEvent, FunctionEvent } from 'graphcool-lib'
 import { GraphQLClient } from 'graphql-request'
 
-interface User {
+interface IUser {
   id: string
 }
 
 export default async (event: FunctionEvent<{}>) => {
-  console.log(event)
-
   try {
     // no logged in user
     if (!event.context.auth || !event.context.auth.nodeId) {
@@ -19,8 +17,8 @@ export default async (event: FunctionEvent<{}>) => {
     const api = graphcool.api('simple/v1')
 
     // get user by id
-    const user: User = await getUser(api, userId)
-      .then(r => r.User)
+    const user: IUser = await getUser(api, userId)
+      .then((r) => r.User)
 
     // no logged in user
     if (!user || !user.id) {
@@ -29,7 +27,6 @@ export default async (event: FunctionEvent<{}>) => {
 
     return { data: { id: user.id } }
   } catch (e) {
-    console.log(e)
     return { error: 'An unexpected error occured during authentication.' }
   }
 }

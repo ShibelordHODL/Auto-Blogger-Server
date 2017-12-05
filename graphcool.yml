@@ -22,7 +22,7 @@ types: ./types.graphql
 functions:
 
 # added by email-password template: (please uncomment)
-# 
+#
   signup:
     type: resolver
     schema: src/email-password/signup.graphql
@@ -41,21 +41,6 @@ functions:
     handler:
       code: src/email-password/loggedInUser.ts
 
-
-  fetchHTML:
-    handler:
-      code:
-        src: ./src/fetchHTML.ts
-    type: resolver
-    schema: ./src/fetchHTML.graphql
-
-  extractArticle:
-    handler:
-      code:
-        src: ./src/extractArticle.ts
-    type: resolver
-    schema: ./src/extractArticle.graphql
-
   newExtractArticle:
     handler:
       code:
@@ -69,24 +54,24 @@ functions:
         src: ./src/translate.ts
     type: resolver
     schema: ./src/translate.graphql
-  
-  # oneStopTranslate:
-  #   handler:
-  #     code:
-  #       src: ./src/oneStopTranslate.js
-  #   type: resolver
-  #   schema: ./src/oneStopTranslate.graphql
 
-  processJob:
+  process:
     handler:
       code:
         src: ./src/processJob.ts
     type: resolver
     schema: ./src/processJob.graphql
 
-    
+  deleteAll:
+    handler:
+      code:
+        src: ./src/deleteAll.ts
+    type: resolver
+    schema: ./src/deleteAll.graphql
 
-  
+
+
+
 
 
 # Model/Relation permissions are used to limit the API access

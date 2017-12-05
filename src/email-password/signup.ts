@@ -1,22 +1,20 @@
+import * as bcrypt from 'bcryptjs'
 import { fromEvent, FunctionEvent } from 'graphcool-lib'
 import { GraphQLClient } from 'graphql-request'
-import * as bcrypt from 'bcryptjs'
 import * as validator from 'validator'
 
-interface User {
+interface IUser {
   id: string
 }
 
-interface EventData {
+interface IEventData {
   email: string
   password: string
 }
 
 const SALT_ROUNDS = 10
 
-export default async (event: FunctionEvent<EventData>) => {
-  console.log(event)
-
+export default async (event: FunctionEvent<IEventData>) => {
   try {
     const graphcool = fromEvent(event)
     const api = graphcool.api('simple/v1')
@@ -29,7 +27,7 @@ export default async (event: FunctionEvent<EventData>) => {
 
     // check if user exists already
     const userExists: boolean = await getUser(api, email)
-      .then(r => r.User !== null)
+      .then((r) => r.User !== null)
     if (userExists) {
       return { error: 'Email already in use' }
     }
@@ -46,7 +44,6 @@ export default async (event: FunctionEvent<EventData>) => {
 
     return { data: { id: userId, token } }
   } catch (e) {
-    console.log(e)
     return { error: 'An unexpected error occured during signup.' }
   }
 }
@@ -81,9 +78,9 @@ async function createGraphcoolUser(api: GraphQLClient, email: string, password: 
 
   const variables = {
     email,
-    password: password,
+    password,
   }
 
-  return api.request<{ createUser: User }>(mutation, variables)
-    .then(r => r.createUser.id)
+  return api.request<{ createUser: IUser }>(mutation, variables)
+    .then((r) => r.createUser.id)
 }

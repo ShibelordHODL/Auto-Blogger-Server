@@ -2,3 +2,5 @@
 node_modules
 .envrc
 .build
+.graphcoolrc
+yarn.lock
