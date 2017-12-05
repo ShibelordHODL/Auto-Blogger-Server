@@ -1,5 +1,5 @@
 import { GraphQLClient } from 'graphql-request'
-import { IJob, ISTATUS } from './interface'
+import { IJob, STATUS } from './interface'
 
 export async function getJob(api: GraphQLClient, id: string): Promise<IJob> {
   const query = `
@@ -28,7 +28,7 @@ export async function getJob(api: GraphQLClient, id: string): Promise<IJob> {
 }
 
 const defaultFilter = {
-  status_not: ISTATUS.COMPLETE,
+  status_not_in: [STATUS.COMPLETE, STATUS.READY, STATUS.CANCELLED],
 }
 export async function getJobs(api: GraphQLClient, filter: object = defaultFilter): Promise<[IJob]> {
   const query = `

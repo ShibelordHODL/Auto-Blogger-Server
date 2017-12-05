@@ -2,9 +2,8 @@
 # based on which the GraphQL API is generated
 
 enum STATUS {
-  DRAFTING
-  READY
   EXTRACTING
+  READY
   TRANSLATING
   PUBLISHING
   COMPLETE
@@ -32,7 +31,7 @@ type Site @model {
   title: String                 #ref name for the site
   type: SITE_TYPE!              @defaultValue(value: WORDPRESS)
   apiPath: String               # root path for calling the APIs
-  token: String                 # site token/credential 
+  token: String                 # site token/credential
   categories: [CategoryMapping!]!  @relation (name: "CategoryMappingForSite")
   posts: [Post!]!               @relation (name: "PostinSite")
 
@@ -59,7 +58,7 @@ type Post @model {
   url: String!                  # URL of posted article
   article: Article!             @relation (name: "ArticleInPost")
   site: Site!                   @relation (name: "PostinSite")
-  
+
   postDate: DateTime!           # Date for posting an article
   createdAt: DateTime!          # read-only (managed by Graphcool)
 }
@@ -67,7 +66,7 @@ type Post @model {
 type Job @model {
   id: ID! @isUnique
   url: String!
-  status: STATUS! @defaultValue(value: DRAFTING)
+  status: STATUS! @defaultValue(value: EXTRACTING)
   rawHTML: String
   rawTitle: String
   rawArticle: String
@@ -85,7 +84,7 @@ type Article @model {
   images: [Image!]! @relation (name: "ImageInArticle")
   wordCount: Int
   excerpt: String
-  status: STATUS! @defaultValue(value: DRAFTING)
+  status: STATUS! @defaultValue(value: EXTRACTING)
   job: Job @relation (name: "JobInArticle")
   post: Post @relation (name: "ArticleInPost")
   publishedDate: DateTime!
@@ -94,7 +93,7 @@ type Article @model {
 
 # type Keyword @model {
 #   id: ID! @isUnique
-#   keyword: String 
+#   keyword: String
 #   articles: [Article!]! @relation (name: "ArticleInKeyword")
 # }
 
@@ -108,6 +107,7 @@ type Category @model {
 
 type Image @model {
   id: ID! @isUnique
+  ref: String!
   source: String
   article: Article! @relation (name: "ImageInArticle")
 }
