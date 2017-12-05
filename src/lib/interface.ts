@@ -71,7 +71,7 @@ export interface IArticle {
   title: string
   article: string
   categories: [ICategory]
-  images: [Image]
+  images: [IImage]
   wordCount: number
   excerpt: string
   status: STATUS
@@ -91,6 +91,7 @@ export interface ICategory {
 
 export interface IImage {
   id: string
+  ref: string
   source: string
   article: IArticle
 }
