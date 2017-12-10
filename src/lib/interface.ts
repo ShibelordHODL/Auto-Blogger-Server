@@ -1,10 +1,15 @@
 export enum STATUS {
   EXTRACTING = 'EXTRACTING',
-  READY = 'READY',
+  ASSIGNING = 'ASSIGNING',
   TRANSLATING = 'TRANSLATING',
   PUBLISHING = 'PUBLISHING',
   COMPLETE = 'COMPLETE',
   CANCELLED = 'CANCELLED',
+}
+
+enum POST_STATUS {
+  ASSIGNED = 'ASSIGNED',
+  POSTED = 'POSTED',
 }
 
 export enum SITE_TYPE {
@@ -25,7 +30,8 @@ export interface ISite {
   type: SITE_TYPE
   apiPath: string
   token: string
-  categories: [ICategoryMapping]
+  categories: [ISiteCategory]
+  jobs: [IJob]
   posts: [IPost]
 
   user: IUser
@@ -33,12 +39,14 @@ export interface ISite {
   updatedAt: Date
 }
 
-export interface ICategoryMapping {
+export interface ISiteCategory {
   id: string
   title: string
-  categoryCode: string
+  ref: number
   site: ISite
   category: ICategory
+  jobs: [IJob]
+  posts: [IPost]
   limitPost: number
 
   createdAt: Date
@@ -46,18 +54,24 @@ export interface ICategoryMapping {
 }
 
 export interface IPost {
-  id: string
-  url: string
-  article: IArticle
-  site: ISite
+  id?: string
+  url?: string
+  status: POST_STATUS
+  article?: IArticle
+  articleId?: string
+  site?: ISite
+  siteId?: string
 
-  postDate: Date
-  createdAt: Date
+  siteCategory?: ISiteCategory
+  siteCategoryId?: string
+  createdAt?: Date
 }
 export interface IJob {
   id: string
   url: string
   status: STATUS
+  site: ISite
+  siteCategory: ISiteCategory
   rawHTML: string
   rawTitle: string
   rawArticle: string
@@ -69,8 +83,8 @@ export interface IArticle {
   id: string
   url: string
   title: string
-  article: string
-  categories: [ICategory]
+  content: string
+  category: ICategory
   images: [IImage]
   wordCount: number
   excerpt: string
@@ -82,16 +96,17 @@ export interface IArticle {
 }
 
 export interface ICategory {
-  id: string
-  name: string
-  parent: ICategory
-  articles: [IArticle]
-  categoryMapping: [ICategoryMapping]
+  id?: string
+  title?: string
+  parent?: ICategory
+  articles?: [IArticle]
+  siteCategories?: [ISiteCategory]
 }
 
 export interface IImage {
-  id: string
-  ref: string
-  source: string
-  article: IArticle
+  id?: string
+  ref?: string
+  source?: string
+  target?: string
+  article?: IArticle
 }

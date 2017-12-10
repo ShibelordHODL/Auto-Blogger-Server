@@ -69,6 +69,20 @@ functions:
     type: resolver
     schema: ./src/deleteAll.graphql
 
+  postToSite:
+    handler:
+      code:
+        src: ./src/postToSite.ts
+    type: resolver
+    schema: ./src/postToSite.graphql
+
+  autoAssign:
+    handler:
+      code:
+        src: ./src/autoAssign.ts
+    type: resolver
+    schema: ./src/autoAssign.graphql
+
 
 
 

@@ -3,15 +3,21 @@
 
 enum STATUS {
   EXTRACTING
-  READY
+  ASSIGNING
   TRANSLATING
   PUBLISHING
   COMPLETE
   CANCELLED
 }
+
 enum SITE_TYPE {
   WORDPRESS
 }
+
+# enum POST_STATUS {
+#   ASSIGNED
+#   POSTED
+# }
 
 # added by email-password template: (please uncomment)
 type User @model {
@@ -28,25 +34,28 @@ type User @model {
 # Site contains site's configurations for remote posting
 type Site @model {
   id: ID! @isUnique
-  title: String                 #ref name for the site
-  type: SITE_TYPE!              @defaultValue(value: WORDPRESS)
-  apiPath: String               # root path for calling the APIs
-  token: String                 # site token/credential
-  categories: [CategoryMapping!]!  @relation (name: "CategoryMappingForSite")
-  posts: [Post!]!               @relation (name: "PostinSite")
+  title: String                     #ref name for the site
+  type: SITE_TYPE!                  @defaultValue(value: WORDPRESS)
+  apiPath: String                   # root path for calling the APIs
+  token: String                     # site token/credential
+  categories: [SiteCategory!]!      @relation (name: "SiteCategoryInSite")
+  jobs: [Job!]!                       @relation (name: "JobForSite")
+  posts: [Post!]!                   @relation (name: "PostinSite")
 
-  user: User!                   @relation (name: "SiteForUser")
-  createdAt: DateTime!          # read-only (managed by Graphcool)
-  updatedAt: DateTime!          # read-only (managed by Graphcool)
+  user: User!                       @relation (name: "SiteForUser")
+  createdAt: DateTime!              # read-only (managed by Graphcool)
+  updatedAt: DateTime!              # read-only (managed by Graphcool)
 }
 
-# Category mapping from article's category to site's category
-type CategoryMapping @model {
+#Site's Category
+type SiteCategory @model {
   id: ID! @isUnique
   title: String                 # Site's name
-  categoryCode: String!         # Category's code in wordpress's site
-  site: Site!                   @relation (name: "CategoryMappingForSite")
-  category: Category!           @relation (name: "MappingToCategory")
+  ref: Int!                     # Category's code in wordpress's site
+  site: Site!                   @relation (name: "SiteCategoryInSite")
+  jobs: [Job!]!                 @relation (name: "SiteCategoryInJob")
+  category: Category!           @relation (name: "SiteCategoryToCategory")
+  # posts: [Post!]!               @relation (name: "siteCategoryInPost")
   limitPost: Int!               # Maximum posts/day
 
   createdAt: DateTime!          # read-only (managed by Graphcool)
@@ -56,30 +65,35 @@ type CategoryMapping @model {
 type Post @model {
   id: ID! @isUnique
   url: String!                  # URL of posted article
+  # status: POST_STATUS!          @defaultValue(value: EXTRACTING)
   article: Article!             @relation (name: "ArticleInPost")
   site: Site!                   @relation (name: "PostinSite")
-
-  postDate: DateTime!           # Date for posting an article
+  # siteCategory: siteCategory    @relation (name: "siteCategoryInPost")
   createdAt: DateTime!          # read-only (managed by Graphcool)
 }
 
 type Job @model {
   id: ID! @isUnique
   url: String!
-  status: STATUS! @defaultValue(value: EXTRACTING)
+  status: STATUS!               @defaultValue(value: EXTRACTING)
+  site: Site                    @relation (name: "JobForSite")
+  siteCategory: SiteCategory    @relation (name: "SiteCategoryInJob")
   rawHTML: String
   rawTitle: String
   rawArticle: String
   rawTranslate: String
-  article: Article @relation (name: "JobInArticle")
+  article: Article              @relation (name: "JobInArticle")
+
+  postDate: DateTime
 }
 
 type Article @model {
   id: ID! @isUnique
   url: String
   title: String
-  article: String
-  categories: [Category!]! @relation (name: "ArticleInCategory")
+  content: String
+  category: Category @relation (name: "ArticleInCategory")
+  # siteCategory: SiteCategory @relation (name: "ArticleInSiteCategory")
   # keywords: [Keyword!]! @relation (name: "ArticleInKeyword")
   images: [Image!]! @relation (name: "ImageInArticle")
   wordCount: Int
@@ -87,28 +101,22 @@ type Article @model {
   status: STATUS! @defaultValue(value: EXTRACTING)
   job: Job @relation (name: "JobInArticle")
   post: Post @relation (name: "ArticleInPost")
-  publishedDate: DateTime!
+  publishedDate: DateTime
   createdAt: DateTime! # read-only (managed by Graphcool)
 }
 
-# type Keyword @model {
-#   id: ID! @isUnique
-#   keyword: String
-#   articles: [Article!]! @relation (name: "ArticleInKeyword")
-# }
-
 type Category @model {
   id: ID! @isUnique
-  name: String
-  parent: Category @relation (name: "CategoryInParent")
+  title: String
   articles: [Article!]! @relation (name: "ArticleInCategory")
-  categoryMapping: [CategoryMapping!]! @relation (name: "MappingToCategory")
+  siteCategories: [SiteCategory!]! @relation (name: "SiteCategoryToCategory")
 }
 
 type Image @model {
   id: ID! @isUnique
   ref: String!
   source: String
+  target: String
   article: Article! @relation (name: "ImageInArticle")
 }
 
