@@ -1,0 +1,9 @@
+type autoAssignPayload {
+  id: ID
+  status: String
+  postDate: DateTime
+}
+
+extend type Mutation {
+  autoAssign(siteId: ID, days: Int, dateOffset: Int ): [autoAssignPayload!]
+}
