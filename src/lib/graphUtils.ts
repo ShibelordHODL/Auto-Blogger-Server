@@ -15,6 +15,15 @@ export async function getJob(api: GraphQLClient, id: string): Promise<IJob> {
           article{
             id
           }
+          site{
+            id
+            apiPath
+            token
+          }
+          siteCategory{
+            ref
+          }
+          postDate
         }
       }
     `
@@ -67,6 +76,7 @@ export async function getSite(api: GraphQLClient, siteId: string): Promise<ISite
         apiPath
         token
         categories{
+          id
           title
           ref
           category {
@@ -158,45 +168,41 @@ export async function getArticles(api: GraphQLClient, categoryId: string, limit:
   } catch (e) { throw (e) }
 }
 
-// export async function getArticles(api: GraphQLClient, categoryId: string, limit: number): Promise<[IArticle]> {
-//   const query = `
-//     query getArticles($categoryId: ID!, $limit: Int){
-//       allArticles(
-//         filter: {
-//           category: {
-//             id: $categoryId
-//           }
-//         }
-//         first: $limit
-//       ) {
-//         id
-//         title
-//         article
-//         category{
-//           id
-//         }
-//         images{
-//           id
-//           ref
-//           source
-//         }
-//         wordCount
-//         excerpt
-//         status
-//         job{
-//           id
-//         }
-//       }
-//     }
-//   `
+export async function getArticle(api: GraphQLClient, articleId: string): Promise<IArticle> {
+  const query = `
+    query getArticle($articleId: ID!){
+      Article(
+        id: $articleId
+      ) {
+        id
+        title
+        content
+        category{
+          id
+        }
+        images{
+          id
+          ref
+          postRef
+          source
+          target
+        }
+        wordCount
+        excerpt
+        status
+        job{
+          id
+        }
+      }
+    }
+  `
 
-//   const variables = {
-//     categoryId,
-//     limit,
-//   }
+  const variables = {
+    articleId,
+  }
 
-//   try {
-//     return api.request<{ allArticles: [IArticle] }>(query, variables)
-//       .then((r) => r.allArticles)
-//   } catch (e) { throw (e) }
-// }
+  try {
+    return api.request<{ Article: IArticle }>(query, variables)
+      .then((r) => r.Article)
+  } catch (e) { throw (e) }
+}

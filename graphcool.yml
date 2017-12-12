@@ -69,6 +69,13 @@ functions:
     type: resolver
     schema: ./src/deleteAll.graphql
 
+  uploadImage:
+    handler:
+      code:
+        src: ./src/uploadImage.ts
+    type: resolver
+    schema: ./src/uploadImage.graphql
+
   postToSite:
     handler:
       code:

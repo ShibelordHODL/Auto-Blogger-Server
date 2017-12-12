@@ -2,6 +2,7 @@ export enum STATUS {
   EXTRACTING = 'EXTRACTING',
   ASSIGNING = 'ASSIGNING',
   TRANSLATING = 'TRANSLATING',
+  IMAGING = 'IMAGING',
   PUBLISHING = 'PUBLISHING',
   COMPLETE = 'COMPLETE',
   CANCELLED = 'CANCELLED',
@@ -77,6 +78,7 @@ export interface IJob {
   rawArticle: string
   rawTranslate: string
   article: IArticle
+  postDate: Date
 }
 
 export interface IArticle {
@@ -106,6 +108,7 @@ export interface ICategory {
 export interface IImage {
   id?: string
   ref?: string
+  postRef?: number
   source?: string
   target?: string
   article?: IArticle
