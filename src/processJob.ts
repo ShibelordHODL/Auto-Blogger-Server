@@ -31,7 +31,9 @@ export default async (event: FunctionEvent<IEventData>) => {
         if (job.status === STATUS.IMAGING) {
           job = await mutateUploadImage(api, job.id)
         }
-
+        if (job.status === STATUS.PUBLISHING) {
+          job = await mutatePostToPage(api, job.id)
+        }
         const response: IProcessResponse = {
           id: job.id,
           status: job.status,
@@ -51,26 +53,6 @@ export default async (event: FunctionEvent<IEventData>) => {
   } catch (error) {
     return { error }
   }
-}
-
-async function mutateUploadImage(api: GraphQLClient, jobId: string): Promise<IJob> {
-
-  const query = `
-    mutation mutateuploadImage($jobId: ID!) {
-      uploadImage(jobId: $jobId) {
-        id
-        status
-      }
-    }
-    `
-
-  const variables = {
-    jobId,
-  }
-  try {
-    return api.request<{ uploadImage: IJob }>(query, variables)
-      .then((r) => r.uploadImage)
-  } catch (e) { throw (e) }
 }
 
 async function mutateExtractArticle(api: GraphQLClient, jobId: string): Promise<IJob> {
@@ -112,5 +94,45 @@ async function mutateTranslate(api: GraphQLClient, jobId: string): Promise<IJob>
   try {
     return api.request<{ translate: IJob }>(query, variables)
       .then((r) => r.translate)
+  } catch (e) { throw (e) }
+}
+
+async function mutateUploadImage(api: GraphQLClient, jobId: string): Promise<IJob> {
+
+  const query = `
+      mutation mutateUploadImage($jobId: ID!) {
+        uploadImage(jobId: $jobId) {
+          id
+          status
+        }
+      }
+      `
+
+  const variables = {
+    jobId,
+  }
+  try {
+    return api.request<{ uploadImage: IJob }>(query, variables)
+      .then((r) => r.uploadImage)
+  } catch (e) { throw (e) }
+}
+
+async function mutatePostToPage(api: GraphQLClient, jobId: string): Promise<IJob> {
+
+  const query = `
+        mutation mutatePostToPage($jobId: ID!) {
+          postToPage(jobId: $jobId) {
+            id
+            status
+          }
+        }
+        `
+
+  const variables = {
+    jobId,
+  }
+  try {
+    return api.request<{ postToPage: IJob }>(query, variables)
+      .then((r) => r.postToPage)
   } catch (e) { throw (e) }
 }
