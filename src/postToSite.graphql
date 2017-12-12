@@ -1,0 +1,8 @@
+type postToSitePayload {
+  id: ID
+  status: String
+}
+
+extend type Mutation {
+  postToSite(jobId: ID): postToSitePayload!
+}
