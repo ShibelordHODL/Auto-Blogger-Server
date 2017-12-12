@@ -35,7 +35,7 @@ export default async (event: FunctionEvent<IEventData>) => {
           article.job.id,
           siteId,
           siteCategory.id,
-          STATUS.EXTRACTING,
+          STATUS.TRANSLATING,
           offsetDate(startDate, Math.floor(index / siteCategory.limitPost)),
         )
         returnResponse.push(response)
