@@ -206,3 +206,31 @@ export async function getArticle(api: GraphQLClient, articleId: string): Promise
       .then((r) => r.Article)
   } catch (e) { throw (e) }
 }
+
+export async function createJob(api: GraphQLClient, url: string, categoryId: string): Promise<IJob> {
+  try {
+    const mutation = `
+    mutation createJob($url: String!, $categoryId: ID!){
+      createJob(
+        url: $url
+        article: {
+          categoryId: $categoryId
+        }
+      ){
+        id
+        url
+        status
+      }
+    }
+  `
+    const variables = {
+      categoryId,
+      url,
+    }
+
+    return api.request<{ createJob: IJob }>(mutation, variables)
+      .then((r) => r.createJob)
+  } catch (e) {
+    throw (e)
+  }
+}
