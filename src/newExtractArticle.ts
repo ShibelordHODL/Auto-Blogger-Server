@@ -32,6 +32,7 @@ export default async (event) => {
       status: STATUS.ASSIGNING,
       title: titleData.data.translations[0].translatedText,
       url: job.url,
+      wordCount: extract.word_count,
     }
     const updateResponse: IJob = await updateJob(
       api, jobId, job.article.id, articleData, replaceData.html, STATUS.ASSIGNING,
