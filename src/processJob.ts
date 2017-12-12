@@ -32,7 +32,7 @@ export default async (event: FunctionEvent<IEventData>) => {
           job = await mutateUploadImage(api, job.id)
         }
         if (job.status === STATUS.PUBLISHING) {
-          job = await mutatePostToPage(api, job.id)
+          job = await mutatePostToSite(api, job.id)
         }
         const response: IProcessResponse = {
           id: job.id,
@@ -117,11 +117,11 @@ async function mutateUploadImage(api: GraphQLClient, jobId: string): Promise<IJo
   } catch (e) { throw (e) }
 }
 
-async function mutatePostToPage(api: GraphQLClient, jobId: string): Promise<IJob> {
+async function mutatePostToSite(api: GraphQLClient, jobId: string): Promise<IJob> {
 
   const query = `
-        mutation mutatePostToPage($jobId: ID!) {
-          postToPage(jobId: $jobId) {
+        mutation mutatePostToSite($jobId: ID!) {
+          postToSite(jobId: $jobId) {
             id
             status
           }
