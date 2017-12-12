@@ -72,13 +72,17 @@ export function replaceImages(html) {
     let index = 1
     for (const image of relativeLinks) {
       const source = $(image).attr('src')
-      images.push({
-        ref: 'i_' + index,
-        source,
-      })
-      const replaceElement = $(`<img src="i_${index}">`)
+      const cleanImg = cleanImageURL(source)
+      if (source) {
+        images.push({
+          ref: 'i_' + index,
+          source: cleanImg,
+        })
+        const replaceElement = $(`<img src="i_${index}">`)
+        $(image).replaceWith(replaceElement)
+      }
       index++
-      $(image).replaceWith(replaceElement)
+
     }
     return {
       html: $('body').html(),
@@ -88,4 +92,21 @@ export function replaceImages(html) {
     throw (error)
   }
 
+}
+
+export function offsetDate(startDate, offset) {
+  const date = new Date(startDate.getTime())
+  date.setDate(date.getDate() + offset)
+  return date
+}
+
+function cleanImageURL(source) {
+  let url = source
+  if (url && url.indexOf('%') > 0) {
+    url = url.substr(0, url.indexOf('%'))
+  }
+  // if (url && url.indexOf('?') > 0) {
+  //   url = url.substr(0, url.indexOf('?'))
+  // }
+  return url
 }

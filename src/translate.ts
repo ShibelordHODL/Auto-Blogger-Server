@@ -15,10 +15,10 @@ export default async (event) => {
     const { jobId } = event.data
     const job: IJob = await getJob(api, jobId)
     const returnData = await translate(job.rawArticle)
-    const article = returnData.data.translations[0].translatedText
+    const content = returnData.data.translations[0].translatedText
 
     // return { error: { returnData } }
-    const updateResponse: IJob = await updateJob(api, job.id, job.article.id, article, STATUS.PUBLISHING)
+    const updateResponse: IJob = await updateJob(api, job.id, job.article.id, content, STATUS.IMAGING)
     return {
       data: {
         id: updateResponse.id,
@@ -40,7 +40,7 @@ async function updateJob(
 ): Promise<IJob> {
   const mutation = `
     mutation insertExtractedData($jobId: ID!, $articleId: ID!, $rawTranslate: String, $status: STATUS){
-      updateArticle(id: $articleId, article: $rawTranslate, status: $status){
+      updateArticle(id: $articleId, content: $rawTranslate, status: $status){
         id
         status
       }

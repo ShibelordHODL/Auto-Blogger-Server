@@ -28,6 +28,9 @@ export default async (event: FunctionEvent<IEventData>) => {
         if (job.status === STATUS.TRANSLATING) {
           job = await mutateTranslate(api, job.id)
         }
+        if (job.status === STATUS.IMAGING) {
+          job = await mutateUploadImage(api, job.id)
+        }
 
         const response: IProcessResponse = {
           id: job.id,
@@ -48,6 +51,26 @@ export default async (event: FunctionEvent<IEventData>) => {
   } catch (error) {
     return { error }
   }
+}
+
+async function mutateUploadImage(api: GraphQLClient, jobId: string): Promise<IJob> {
+
+  const query = `
+    mutation mutateuploadImage($jobId: ID!) {
+      uploadImage(jobId: $jobId) {
+        id
+        status
+      }
+    }
+    `
+
+  const variables = {
+    jobId,
+  }
+  try {
+    return api.request<{ uploadImage: IJob }>(query, variables)
+      .then((r) => r.uploadImage)
+  } catch (e) { throw (e) }
 }
 
 async function mutateExtractArticle(api: GraphQLClient, jobId: string): Promise<IJob> {
