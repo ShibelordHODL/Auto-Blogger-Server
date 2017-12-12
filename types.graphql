@@ -5,6 +5,7 @@ enum STATUS {
   EXTRACTING
   ASSIGNING
   TRANSLATING
+  IMAGING
   PUBLISHING
   COMPLETE
   CANCELLED
@@ -39,7 +40,7 @@ type Site @model {
   apiPath: String                   # root path for calling the APIs
   token: String                     # site token/credential
   categories: [SiteCategory!]!      @relation (name: "SiteCategoryInSite")
-  jobs: [Job!]!                       @relation (name: "JobForSite")
+  jobs: [Job!]!                     @relation (name: "JobForSite")
   posts: [Post!]!                   @relation (name: "PostinSite")
 
   user: User!                       @relation (name: "SiteForUser")
@@ -115,9 +116,10 @@ type Category @model {
 type Image @model {
   id: ID! @isUnique
   ref: String!
+  postRef: Int
   source: String
   target: String
-  article: Article! @relation (name: "ImageInArticle")
+  article: Article @relation (name: "ImageInArticle")
 }
 
 
