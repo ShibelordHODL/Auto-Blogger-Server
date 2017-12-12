@@ -1,10 +1,5 @@
 import { fromEvent, FunctionEvent } from 'graphcool-lib'
 import { GraphQLClient } from 'graphql-request'
-import { translate } from './lib/external-api/google'
-import { extractArticle } from './lib/external-api/mercury'
-import { getJob } from './lib/graphUtils'
-import { IArticle, IJob, STATUS } from './lib/interface'
-import { cleanPageHTML, replaceImages } from './lib/utils'
 
 interface IEventData {
   table: string
@@ -20,7 +15,7 @@ export default async (event: FunctionEvent<IEventData>) => {
     const graphcool = fromEvent(event)
     const api = graphcool.api('simple/v1')
     const { table, deleteList } = event.data
-    const results = []
+    const results: IResult[] = []
     if (deleteList) {
       const list = deleteList
       for (const row of list) {
@@ -41,30 +36,39 @@ export default async (event: FunctionEvent<IEventData>) => {
 }
 
 async function getAll(api: GraphQLClient, table: string): Promise<[IResult]> {
-  const query = `
-    query getAll${table}{
-      all${table}s{
-        id
+  try {
+    table = table.replace(/y$/, 'ie')
+    const query = `
+      query getAll${table}s{
+        all${table}s{
+          id
+        }
       }
-    }
-  `
+    `
 
-  return api.request<{ getAll: any }>(query)
-    .then((r) => r[`all${table}s`])
+    return api.request<{ getAll: any }>(query)
+      .then((r) => r[`all${table}s`])
+  } catch (e) {
+    throw (e)
+  }
 }
 
 async function dynamicDelete(api: GraphQLClient, table: string, id: string): Promise<IResult> {
-  const mutation = `
+  try {
+    const mutation = `
     mutation delete${table}($id: ID!){
       delete${table}(id: $id){
         id
       }
     }
   `
-  const variables = {
-    id,
-  }
+    const variables = {
+      id,
+    }
 
-  return api.request<{ delete: any }>(mutation, variables)
-    .then((r) => r[`delete${table}`])
+    return api.request<{ delete: any }>(mutation, variables)
+      .then((r) => r[`delete${table}`])
+  } catch (e) {
+    throw (e)
+  }
 }
