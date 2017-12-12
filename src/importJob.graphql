@@ -1,0 +1,8 @@
+type importJobPayload {
+  success: [Json!]!
+  fail: [Json!]!
+}
+
+extend type Mutation {
+  importJob(urlList: [String!]!, categoryId: ID!): importJobPayload!
+}

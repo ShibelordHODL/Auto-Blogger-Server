@@ -90,6 +90,13 @@ functions:
     type: resolver
     schema: ./src/autoAssign.graphql
 
+  importJob:
+    handler:
+      code:
+        src: ./src/importJob.ts
+    type: resolver
+    schema: ./src/importJob.graphql
+
 
 
 

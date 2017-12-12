@@ -75,7 +75,7 @@ type Post @model {
 
 type Job @model {
   id: ID! @isUnique
-  url: String!
+  url: String! @isUnique
   status: STATUS!               @defaultValue(value: EXTRACTING)
   site: Site                    @relation (name: "JobForSite")
   siteCategory: SiteCategory    @relation (name: "SiteCategoryInJob")
