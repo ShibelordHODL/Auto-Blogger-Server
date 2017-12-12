@@ -61,10 +61,11 @@ async function updateJob(
     mutation insertExtractedData(
       $jobId: ID!, $articleId: ID!, $images: [ArticleimagesImage!],
       $publishedDate: DateTime, $title: String, $url: String,
-      $rawArticle: String, $status: STATUS
+      $rawArticle: String, $wordCount: Int, $status: STATUS
     ){
       updateArticle(
-        id: $articleId, images: $images, publishedDate: $publishedDate, status: $status, title: $title, url: $url
+        id: $articleId, images: $images, publishedDate: $publishedDate,
+        status: $status, title: $title, url: $url, wordCount: $wordCount
       ){
         id
         status
@@ -89,6 +90,7 @@ async function updateJob(
     status,
     title: articleData.title,
     url: articleData.url,
+    wordCount: articleData.wordCount,
   }
 
   return api.request<{ updateJob: IJob }>(mutation, variables)
