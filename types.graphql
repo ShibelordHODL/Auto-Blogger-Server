@@ -32,6 +32,30 @@ type User @model {
   sites: [Site!]! @relation (name: "SiteForUser")
 }
 
+type Source @model {
+  id: ID! @isUnique                 # read-only (managed by Graphcool)
+  title: String                     #ref name for the site
+  url: String                       #Source main url
+  feeds: Feed                       @relation (name: "FeedInSource")
+
+  jobs: [Job!]!                     @relation (name: "JobInSource")
+  articles: [Article!]!             @relation (name: "ArticleInSource")
+
+
+  createdAt: DateTime!              # read-only (managed by Graphcool)
+  updatedAt: DateTime!              # read-only (managed by Graphcool)
+}
+
+type Feed @model{
+  id: ID! @isUnique                 # read-only (managed by Graphcool)
+  feed: String!
+  category: Category                @relation (name: "FeedInCategory")
+  source: Source                    @relation (name: "FeedInSource")
+
+  createdAt: DateTime!              # read-only (managed by Graphcool)
+  updatedAt: DateTime!              # read-only (managed by Graphcool)
+}
+
 # Site contains site's configurations for remote posting
 type Site @model {
   id: ID! @isUnique
@@ -79,6 +103,7 @@ type Job @model {
   status: STATUS!               @defaultValue(value: EXTRACTING)
   site: Site                    @relation (name: "JobForSite")
   siteCategory: SiteCategory    @relation (name: "SiteCategoryInJob")
+  source: Source                @relation (name: "JobInSource")
   rawHTML: String
   rawTitle: String
   rawArticle: String
@@ -93,24 +118,26 @@ type Article @model {
   url: String
   title: String
   content: String
-  category: Category @relation (name: "ArticleInCategory")
+  category: Category            @relation (name: "ArticleInCategory")
   # siteCategory: SiteCategory @relation (name: "ArticleInSiteCategory")
   # keywords: [Keyword!]! @relation (name: "ArticleInKeyword")
-  images: [Image!]! @relation (name: "ImageInArticle")
+  images: [Image!]!             @relation (name: "ImageInArticle")
   wordCount: Int
   excerpt: String
-  status: STATUS! @defaultValue(value: EXTRACTING)
-  job: Job @relation (name: "JobInArticle")
-  post: Post @relation (name: "ArticleInPost")
+  status: STATUS!               @defaultValue(value: EXTRACTING)
+  job: Job                      @relation (name: "JobInArticle")
+  post: Post                    @relation (name: "ArticleInPost")
+  source: Source                @relation (name: "ArticleInSource")
   publishedDate: DateTime
-  createdAt: DateTime! # read-only (managed by Graphcool)
+  createdAt: DateTime!          # read-only (managed by Graphcool)
 }
 
 type Category @model {
   id: ID! @isUnique
   title: String
-  articles: [Article!]! @relation (name: "ArticleInCategory")
-  siteCategories: [SiteCategory!]! @relation (name: "SiteCategoryToCategory")
+  articles: [Article!]!             @relation (name: "ArticleInCategory")
+  siteCategories: [SiteCategory!]!  @relation (name: "SiteCategoryToCategory")
+  feeds: [Feed!]!                   @relation (name: "FeedInCategory")
 }
 
 type Image @model {
@@ -119,7 +146,7 @@ type Image @model {
   postRef: Int
   source: String
   target: String
-  article: Article @relation (name: "ImageInArticle")
+  article: Article                  @relation (name: "ImageInArticle")
 }
 
 

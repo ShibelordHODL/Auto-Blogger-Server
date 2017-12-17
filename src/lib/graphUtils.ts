@@ -39,10 +39,10 @@ export async function getJob(api: GraphQLClient, id: string): Promise<IJob> {
 const defaultFilter = {
   status_not_in: [STATUS.COMPLETE, STATUS.ASSIGNING, STATUS.CANCELLED],
 }
-export async function getJobs(api: GraphQLClient, filter: object = defaultFilter): Promise<[IJob]> {
+export async function getJobs(api: GraphQLClient, first: number, filter: object = defaultFilter): Promise<[IJob]> {
   const query = `
-  query getJobs($filter: JobFilter){
-      allJobs(filter: $filter) {
+  query getJobs($filter: JobFilter, $first: Int){
+      allJobs(filter: $filter, first: $first) {
         id
         url
         status
@@ -58,6 +58,7 @@ export async function getJobs(api: GraphQLClient, filter: object = defaultFilter
   `
   const variables = {
     filter,
+    first,
   }
 
   try {
@@ -132,6 +133,9 @@ export async function getArticles(api: GraphQLClient, categoryId: string, limit:
         filter: {
           category: {
             id: $categoryId
+          }
+          AND: {
+            status: ASSIGNING
           }
         }
         first: $limit

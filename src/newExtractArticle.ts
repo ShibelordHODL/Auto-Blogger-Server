@@ -19,10 +19,8 @@ export default async (event) => {
     const job: IJob = await getJob(api, jobId)
     const url = job.url
     const extract = await extractArticle(url)
-    const cleanHTML = await cleanPageHTML(extract.content)
-    const replaceData = replaceImages(cleanHTML)
     const titleData = await translate(extract.title)
-
+    const replaceData = replaceImages(cleanPageHTML(extract.content))
     const articleData = {
       images: [...replaceData.images, {
         ref: 'i_m',
@@ -37,6 +35,7 @@ export default async (event) => {
     const updateResponse: IJob = await updateJob(
       api, jobId, job.article.id, articleData, replaceData.html, STATUS.ASSIGNING,
     )
+
     return {
       data: {
         id: updateResponse.id,
@@ -92,7 +91,8 @@ async function updateJob(
     url: articleData.url,
     wordCount: articleData.wordCount,
   }
-
-  return api.request<{ updateJob: IJob }>(mutation, variables)
-    .then((r) => r.updateJob)
+  try {
+    return api.request<{ updateJob: IJob }>(mutation, variables)
+      .then((r) => r.updateJob)
+  } catch (e) { throw (e) }
 }

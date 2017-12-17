@@ -1,8 +1,8 @@
 type processPayload {
-  id: ID
-  status: String
+  success: [Json!]!
+  fail: [Json!]!
 }
 
 extend type Mutation {
-  process(limit: Int): [processPayload!]
+  process(concurrent: Int, first: Int): processPayload!
 }

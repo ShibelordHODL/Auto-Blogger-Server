@@ -3,12 +3,13 @@ import { GraphQLClient } from 'graphql-request'
 import { uploadArticle, uploadImage } from './lib/external-api/wordpress'
 import { getArticles, getSite } from './lib/graphUtils'
 import { IArticle, ICategory, IJob, ISite, STATUS } from './lib/interface'
-import { offsetDate } from './lib/utils'
+import { offsetDate, sliceArray } from './lib/utils'
 
 interface IEventData {
   siteId: string
   days: number
   dateOffset: number
+  concurrent: number
 }
 
 interface IResponse {
@@ -17,34 +18,57 @@ interface IResponse {
   postDate: Date
 }
 
+interface ISuccess {
+  id: string
+  status: string
+  postDate: Date
+}
+
+interface IFail {
+  id: string
+  massage: any,
+}
+
 export default async (event: FunctionEvent<IEventData>) => {
   try {
     const graphcool = fromEvent(event)
     const api = graphcool.api('simple/v1')
-    const { siteId, days, dateOffset } = event.data
+    const { siteId, days, dateOffset, concurrent = 10 } = event.data
     const site: ISite = await getSite(api, siteId)
-    const returnResponse = []
+    const success = []
+    const fail: IFail[] = []
 
     const startDate = offsetDate(new Date(), dateOffset)
     for (const siteCategory of site.categories) {
       const articles: [IArticle] = await getArticles(api, siteCategory.category.id, siteCategory.limitPost * days)
-      let index = 0
-      for (const article of articles) {
-        const response = await updateJob(
-          api,
-          article.job.id,
-          siteId,
-          siteCategory.id,
-          STATUS.TRANSLATING,
-          offsetDate(startDate, Math.floor(index / siteCategory.limitPost)),
-        )
-        returnResponse.push(response)
-        index++
-      }
+      let chunkIndex = 0
+      for (const chunks of sliceArray(articles, concurrent)) {
+        await Promise.all(chunks.map(async (article: IArticle, i: number) => {
 
+          try {
+
+            const response = await updateJob(
+              api,
+              article.id,
+              article.job.id,
+              siteId,
+              siteCategory.id,
+              STATUS.TRANSLATING,
+              offsetDate(startDate, Math.floor((i + (chunkIndex * concurrent)) / siteCategory.limitPost)),
+            )
+            success.push(response)
+
+          } catch (massage) {
+            const failResponse: IFail = { massage, id: article.id }
+            fail.push(failResponse)
+          }
+        }))
+        chunkIndex++
+      }
     }
+    // console.log(JSON.stringify(success))
     return {
-      data: returnResponse,
+      data: { fail, success },
     }
 
   } catch (error) {
@@ -54,6 +78,7 @@ export default async (event: FunctionEvent<IEventData>) => {
 
 async function updateJob(
   api: GraphQLClient,
+  articleId: string,
   jobId: string,
   siteId: string,
   siteCategoryId: string,
@@ -61,7 +86,18 @@ async function updateJob(
   postDate: Date,
 ): Promise<IJob> {
   const mutation = `
-    mutation insertAssignData($jobId: ID!, $siteId: ID, $siteCategoryId: ID, $status: STATUS, $postDate: DateTime){
+    mutation insertAssignData(
+      $articleId: ID!,
+      $jobId: ID!,
+      $siteId: ID,
+      $siteCategoryId: ID,
+      $status: STATUS,
+      $postDate: DateTime
+    ){
+      updateArticle(id: $articleId, status: $status){
+        id
+        status
+      }
       updateJob(
         id: $jobId,
         siteId: $siteId
@@ -76,13 +112,15 @@ async function updateJob(
     }
   `
   const variables = {
+    articleId,
     jobId,
     postDate,
     siteCategoryId,
     siteId,
     status,
   }
-
-  return api.request<{ updateJob: IJob }>(mutation, variables)
-    .then((r) => r.updateJob)
+  try {
+    return api.request<{ updateJob: IJob }>(mutation, variables)
+      .then((r) => r.updateJob)
+  } catch (e) { throw (e) }
 }

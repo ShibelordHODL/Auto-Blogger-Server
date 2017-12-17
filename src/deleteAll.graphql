@@ -1,7 +1,8 @@
 type deleteAllPayload {
-  id: ID
+  success: [Json!]!
+  fail: [Json!]!
 }
 
 extend type Mutation {
-  deleteAll(table: String!, deleteList: [String!]): [deleteAllPayload!]
+  deleteAll(table: String!, deleteList: [String!], concurrent: Int): deleteAllPayload!
 }
