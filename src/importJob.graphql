@@ -4,5 +4,5 @@ type importJobPayload {
 }
 
 extend type Mutation {
-  importJob(urlList: [String!]!, categoryId: ID!): importJobPayload!
+  importJob(urlList: [String!]!, categoryId: ID!, concurrent: Int): importJobPayload!
 }
