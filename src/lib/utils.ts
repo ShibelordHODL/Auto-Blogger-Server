@@ -110,3 +110,11 @@ function cleanImageURL(source) {
   // }
   return url
 }
+
+export function sliceArray(list: [any], size: number) {
+  const chunks = []
+  for (let i = 0; i < list.length; i += size) {
+    chunks.push(list.slice(i, i + size))
+  }
+  return chunks
+}
