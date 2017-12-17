@@ -1,7 +1,7 @@
 import { fromEvent, FunctionEvent } from 'graphcool-lib'
 import { GraphQLClient } from 'graphql-request'
 
-import { getFeeds, createJob } from './lib/graphUtils'
+import { createJob, getFeeds } from './lib/graphUtils'
 import { IFeed } from './lib/interface'
 import { sliceArray } from './lib/utils'
 
