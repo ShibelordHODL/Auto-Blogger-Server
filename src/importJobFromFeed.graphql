@@ -1,0 +1,8 @@
+type importJobFromFeedPayload {
+  success: [Json!]!
+  fail: [Json!]!
+}
+
+extend type Mutation {
+  importJobFromFeed(sourceId: ID, concurrent: Int): importJobFromFeedPayload!
+}

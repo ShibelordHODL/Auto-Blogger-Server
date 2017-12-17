@@ -97,6 +97,17 @@ functions:
     type: resolver
     schema: ./src/importJob.graphql
 
+  importJobFromFeed:
+    handler:
+      code:
+        src: ./src/importJobFromFeed.ts
+    type: resolver
+    schema: ./src/importJobFromFeed.graphql
+
+
+
+
+
 
 
 
