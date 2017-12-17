@@ -1,9 +1,8 @@
 type autoAssignPayload {
-  id: ID
-  status: String
-  postDate: DateTime
+  success: [Json!]!
+  fail: [Json!]!
 }
 
 extend type Mutation {
-  autoAssign(siteId: ID, days: Int, dateOffset: Int ): [autoAssignPayload!]
+  autoAssign(siteId: ID, days: Int, dateOffset: Int, concurrent: Int ): autoAssignPayload!
 }

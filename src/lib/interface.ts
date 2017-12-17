@@ -25,6 +25,30 @@ export interface IUser {
   password: string
   sites: [ISite]
 }
+
+export interface ISource {
+  id: string
+  title: string
+  url: string
+  feeds: [IFeed]
+
+  jobs: [IJob]
+  articles: [IArticle]
+
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface IFeed {
+  id: string
+  feed: string
+  category: ICategory
+  source: ISource
+
+  createdAt: Date
+  updatedAt: Date
+}
+
 export interface ISite {
   id: string
   title: string
@@ -73,6 +97,7 @@ export interface IJob {
   status: STATUS
   site: ISite
   siteCategory: ISiteCategory
+  source: ISource
   rawHTML: string
   rawTitle: string
   rawArticle: string
@@ -93,6 +118,7 @@ export interface IArticle {
   status: STATUS
   job: IJob
   post: IPost
+  source: ISource
   publishedDate: Date
   createdAt: Date
 }
@@ -103,6 +129,7 @@ export interface ICategory {
   parent?: ICategory
   articles?: [IArticle]
   siteCategories?: [ISiteCategory]
+  feeds?: [IFeed]
 }
 
 export interface IImage {

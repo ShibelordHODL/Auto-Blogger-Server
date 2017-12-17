@@ -1,12 +1,27 @@
 import { fromEvent, FunctionEvent } from 'graphcool-lib'
 import { GraphQLClient } from 'graphql-request'
+import { sliceArray } from './lib/utils'
 
 interface IEventData {
   table: string
   deleteList: [string]
+  concurrent?: number
 }
 
 interface IResult {
+  id: string
+}
+
+interface ISuccess {
+  id: string
+}
+
+interface IFail {
+  id: string
+  massage: any,
+}
+
+interface IRow {
   id: string
 }
 
@@ -14,22 +29,43 @@ export default async (event: FunctionEvent<IEventData>) => {
   try {
     const graphcool = fromEvent(event)
     const api = graphcool.api('simple/v1')
-    const { table, deleteList } = event.data
-    const results: IResult[] = []
+    const { table, deleteList, concurrent = 10 } = event.data
+    const success: ISuccess[] = []
+    const fail: IFail[] = []
     if (deleteList) {
       const list = deleteList
-      for (const row of list) {
-        const result: IResult = await dynamicDelete(api, table, row)
-        results.push(result)
+      for (const chunks of sliceArray(list, concurrent)) {
+        await Promise.all(chunks.map(async (row: string) => {
+          try {
+            const result: IResult = await dynamicDelete(api, table, row)
+            success.push(result)
+          } catch (massage) {
+            const failResponse: IFail = { massage, id: row }
+            fail.push(failResponse)
+          }
+        }))
       }
+
+      // for (const row of list) {
+      //   const result: IResult = await dynamicDelete(api, table, row)
+      //   results.push(result)
+      // }
     } else {
       const list = await getAll(api, table)
-      for (const row of list) {
-        const result: IResult = await dynamicDelete(api, table, row.id)
-        results.push(result)
+      for (const chunks of sliceArray(list, concurrent)) {
+        await Promise.all(chunks.map(async (row: IRow) => {
+          try {
+            const result: IResult = await dynamicDelete(api, table, row.id)
+            success.push(result)
+          } catch (massage) {
+            const failResponse: IFail = { massage, id: row.id }
+            fail.push(failResponse)
+          }
+        }))
       }
+
     }
-    return { data: results }
+    return { data: { fail, success } }
   } catch (error) {
     return { error }
   }

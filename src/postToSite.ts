@@ -15,22 +15,15 @@ interface IResponse {
 
 export default async (event: FunctionEvent<IEventData>) => {
   try {
-    console.log('-0')
     const graphcool = fromEvent(event)
     const api = graphcool.api('simple/v1')
     const { jobId } = event.data
     const returnResponse: IResponse[] = []
-    console.log('0')
     const job: IJob = await getJob(api, jobId)
-    console.log('1')
     const article: IArticle = await getArticle(api, job.article.id)
-    console.log('2')
     const mainImage: IImage = article.images.find((img) => img.ref === 'i_m')
-    console.log('3')
     const uploadResponse = await uploadArticle(job.site, article, mainImage.postRef, job.siteCategory.ref, job.postDate)
-    console.log('4')
     const response: IResponse = await updateJob(api, jobId, article.id, STATUS.COMPLETE)
-    console.log('5')
     return {
       data: response,
     }
