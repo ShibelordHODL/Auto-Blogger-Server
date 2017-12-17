@@ -47,7 +47,7 @@ type Feed @model{
   feed: String!
   category: Category                @relation (name: "FeedInCategory")
   source: Source                    @relation (name: "FeedInSource")
-  job: Job!                         @relation (name: "JobInFeed")
+  jobs: [Job!]!                     @relation (name: "JobInFeed")
 
   createdAt: DateTime!              # read-only (managed by Graphcool)
   updatedAt: DateTime!              # read-only (managed by Graphcool)
