@@ -36,7 +36,7 @@ export default async (event: FunctionEvent<IEventData>) => {
       await Promise.all(chunks.map(async (feed: IFeed) => {
         try {
           const parser = require('rss-parser')
-          const aaa = await new Promise((resolve, reject) => {
+          await new Promise((resolve, reject) => {
             parser.parseURL(feed.feed, async (err, parsed) => {
               if (err) {
                 const failResponse: IFail = {
