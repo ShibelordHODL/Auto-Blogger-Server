@@ -149,7 +149,7 @@ async function mutatePostToSite(api: GraphQLClient, jobId: string): Promise<any>
     jobId,
   }
   try {
-    return api.request<{ postToPage: IJob }>(mutation, variables)
+    return api.request<{ postToSite: IJob }>(mutation, variables)
       .then((r) => r.postToSite)
   } catch (e) { throw (e) }
 }

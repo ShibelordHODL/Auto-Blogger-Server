@@ -32,9 +32,6 @@ export interface ISource {
   url: string
   feeds: [IFeed]
 
-  jobs: [IJob]
-  articles: [IArticle]
-
   createdAt: Date
   updatedAt: Date
 }
@@ -44,6 +41,7 @@ export interface IFeed {
   feed: string
   category: ICategory
   source: ISource
+  jobs: IJob
 
   createdAt: Date
   updatedAt: Date
@@ -97,7 +95,7 @@ export interface IJob {
   status: STATUS
   site: ISite
   siteCategory: ISiteCategory
-  source: ISource
+  feed: IFeed
   rawHTML: string
   rawTitle: string
   rawArticle: string
@@ -118,7 +116,6 @@ export interface IArticle {
   status: STATUS
   job: IJob
   post: IPost
-  source: ISource
   publishedDate: Date
   createdAt: Date
 }

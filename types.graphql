@@ -36,11 +36,7 @@ type Source @model {
   id: ID! @isUnique                 # read-only (managed by Graphcool)
   title: String                     #ref name for the site
   url: String                       #Source main url
-  feeds: Feed                       @relation (name: "FeedInSource")
-
-  jobs: [Job!]!                     @relation (name: "JobInSource")
-  articles: [Article!]!             @relation (name: "ArticleInSource")
-
+  feeds: [Feed!]!                   @relation (name: "FeedInSource")
 
   createdAt: DateTime!              # read-only (managed by Graphcool)
   updatedAt: DateTime!              # read-only (managed by Graphcool)
@@ -51,6 +47,7 @@ type Feed @model{
   feed: String!
   category: Category                @relation (name: "FeedInCategory")
   source: Source                    @relation (name: "FeedInSource")
+  jobs: [Job!]!                     @relation (name: "JobInFeed")
 
   createdAt: DateTime!              # read-only (managed by Graphcool)
   updatedAt: DateTime!              # read-only (managed by Graphcool)
@@ -103,7 +100,7 @@ type Job @model {
   status: STATUS!               @defaultValue(value: EXTRACTING)
   site: Site                    @relation (name: "JobForSite")
   siteCategory: SiteCategory    @relation (name: "SiteCategoryInJob")
-  source: Source                @relation (name: "JobInSource")
+  feed: Feed                    @relation (name: "JobInFeed")
   rawHTML: String
   rawTitle: String
   rawArticle: String
@@ -127,7 +124,6 @@ type Article @model {
   status: STATUS!               @defaultValue(value: EXTRACTING)
   job: Job                      @relation (name: "JobInArticle")
   post: Post                    @relation (name: "ArticleInPost")
-  source: Source                @relation (name: "ArticleInSource")
   publishedDate: DateTime
   createdAt: DateTime!          # read-only (managed by Graphcool)
 }

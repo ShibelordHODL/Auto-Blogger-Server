@@ -1,5 +1,5 @@
 import { GraphQLClient } from 'graphql-request'
-import { IArticle, IJob, ISite, STATUS } from './interface'
+import { IArticle, IFeed, IJob, ISite, STATUS } from './interface'
 
 export async function getJob(api: GraphQLClient, id: string): Promise<IJob> {
   const query = `
@@ -212,8 +212,7 @@ export async function getArticle(api: GraphQLClient, articleId: string): Promise
 }
 
 export async function createJob(api: GraphQLClient, url: string, categoryId: string): Promise<IJob> {
-  try {
-    const mutation = `
+  const mutation = `
     mutation createJob($url: String!, $categoryId: ID!){
       createJob(
         url: $url
@@ -227,14 +226,34 @@ export async function createJob(api: GraphQLClient, url: string, categoryId: str
       }
     }
   `
-    const variables = {
-      categoryId,
-      url,
-    }
-
-    return api.request<{ createJob: IJob }>(mutation, variables)
-      .then((r) => r.createJob)
-  } catch (e) {
-    throw (e)
+  const variables = {
+    categoryId,
+    url,
   }
+
+  return api.request<{ createJob: IJob }>(mutation, variables)
+    .then((r) => r.createJob)
+}
+
+export async function getFeeds(api: GraphQLClient): Promise<[IFeed]> {
+  const query = `
+  query getFeeds{
+      allFeeds{
+        id
+        feed
+        category{
+          id
+        }
+        source{
+          id
+          title
+        }
+      }
+    }
+  `
+
+  try {
+    return api.request<{ allFeeds: [IFeed] }>(query)
+      .then((r) => r.allFeeds)
+  } catch (e) { throw (e) }
 }
