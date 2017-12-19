@@ -4,7 +4,7 @@ import { translate } from './lib/external-api/google'
 import { extractArticle } from './lib/external-api/mercury'
 import { getJob } from './lib/graphUtils'
 import { IArticle, IJob, STATUS } from './lib/interface'
-import { cleanPageHTML, replaceImages } from './lib/utils'
+import { cleanPageHTML, replaceImages, wordCount } from './lib/utils'
 
 export interface IEventData {
   jobId: string
@@ -30,7 +30,7 @@ export default async (event) => {
       status: STATUS.ASSIGNING,
       title: titleData.data.translations[0].translatedText,
       url: job.url,
-      wordCount: extract.word_count,
+      wordCount: wordCount(extract.content),
     }
     const updateResponse: IJob = await updateJob(
       api, jobId, job.article.id, articleData, replaceData.html, STATUS.ASSIGNING,
