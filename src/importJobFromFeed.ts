@@ -50,7 +50,7 @@ export default async (event: FunctionEvent<IEventData>) => {
               } else {
                 await Promise.all(parsed.feed.entries.map(async (entry) => {
                   try {
-                    const result: ISuccess = await createJob(api, entry.link, feed.category.id)
+                    const result: ISuccess = await createJob(api, entry.link, feed.category.id, feed.id)
                     success.push(result)
                   } catch (err) {
                     const failResponse: IFail = {

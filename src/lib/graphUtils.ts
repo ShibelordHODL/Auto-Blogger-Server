@@ -211,11 +211,17 @@ export async function getArticle(api: GraphQLClient, articleId: string): Promise
   } catch (e) { throw (e) }
 }
 
-export async function createJob(api: GraphQLClient, url: string, categoryId: string): Promise<IJob> {
+export async function createJob(
+  api: GraphQLClient,
+  url: string,
+  categoryId: string,
+  feedId: string = null,
+): Promise<IJob> {
   const mutation = `
-    mutation createJob($url: String!, $categoryId: ID!){
+    mutation createJob($url: String!, $categoryId: ID!, $feedId: ID){
       createJob(
         url: $url
+        feedId: $feedId
         article: {
           categoryId: $categoryId
         }
@@ -228,6 +234,7 @@ export async function createJob(api: GraphQLClient, url: string, categoryId: str
   `
   const variables = {
     categoryId,
+    feedId,
     url,
   }
 
