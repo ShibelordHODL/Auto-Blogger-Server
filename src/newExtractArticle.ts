@@ -1,9 +1,9 @@
 import { fromEvent, FunctionEvent } from 'graphcool-lib'
 import { GraphQLClient } from 'graphql-request'
-import { translate } from './lib/external-api/google'
 import { extractArticle } from './lib/external-api/mercury'
 import { getJob } from './lib/graphUtils'
 import { IArticle, IJob, STATUS } from './lib/interface'
+import { localTranslate } from './lib/utils'
 import { cleanPageHTML, replaceImages, wordCount } from './lib/utils'
 
 export interface IEventData {
@@ -19,7 +19,8 @@ export default async (event) => {
     const job: IJob = await getJob(api, jobId)
     const url = job.url
     const extract = await extractArticle(url)
-    const titleData = await translate(extract.title)
+    const title = await localTranslate(extract.title)
+
     const replaceData = replaceImages(cleanPageHTML(extract.content))
     const articleData = {
       images: [...replaceData.images, {
@@ -28,7 +29,7 @@ export default async (event) => {
       }],
       publishedDate: extract.date_published,
       status: STATUS.ASSIGNING,
-      title: titleData.data.translations[0].translatedText,
+      title,
       url: job.url,
       wordCount: wordCount(extract.content),
     }

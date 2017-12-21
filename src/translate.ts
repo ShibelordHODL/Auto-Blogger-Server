@@ -1,8 +1,8 @@
 import { fromEvent, FunctionEvent } from 'graphcool-lib'
 import { GraphQLClient } from 'graphql-request'
-import { translate } from './lib/external-api/google'
 import { getJob } from './lib/graphUtils'
 import { IJob, STATUS } from './lib/interface'
+import { localTranslate } from './lib/utils'
 
 interface IEventData {
   jobId: string
@@ -14,8 +14,8 @@ export default async (event) => {
     const api = graphcool.api('simple/v1')
     const { jobId } = event.data
     const job: IJob = await getJob(api, jobId)
-    const returnData = await translate(job.rawArticle)
-    const content = returnData.data.translations[0].translatedText
+    const content = await localTranslate(job.rawArticle)
+    // const content = returnData.data.translations[0].translatedText
 
     // return { error: { returnData } }
     const updateResponse: IJob = await updateJob(api, job.id, job.article.id, content, STATUS.IMAGING)
