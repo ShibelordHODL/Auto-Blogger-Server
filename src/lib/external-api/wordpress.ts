@@ -22,7 +22,7 @@ export async function uploadImage(site: ISite, image: IImage) {
     const imageName = imageURL.substr(imageURL.lastIndexOf('/') + 1, imageURL.length) + '.jpg'
     const imageBuffer = await downloadImage(image.source)
     const headers = {
-      authorization: 'Bearer ' + site.token,
+      authorization: site.token,
     }
     const FormData = require('form-data')
     const data = new FormData()
@@ -54,7 +54,7 @@ export async function uploadArticle(site: ISite, article: IArticle, imageId: num
     }
 
     const headers = {
-      authorization: 'Bearer ' + site.token,
+      authorization: site.token,
     }
     const FormData = require('form-data')
     const data = new FormData()

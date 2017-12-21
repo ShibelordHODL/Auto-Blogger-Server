@@ -1,3 +1,4 @@
+import * as cheerio from 'cheerio'
 import * as sanitizeHtml from 'sanitize-html'
 
 const sanitizeConfigs: object = {
@@ -62,7 +63,6 @@ export function cleanPageHTML(d) {
 }
 
 export function replaceImages(html) {
-  const cheerio = require('cheerio')
   try {
     const $ = cheerio.load(html, {
       withDomLvl1: false,
@@ -117,4 +117,11 @@ export function sliceArray(list: [any], size: number) {
     chunks.push(list.slice(i, i + size))
   }
   return chunks
+}
+
+export function wordCount(content: string) {
+  const $ = cheerio.load(content, {
+    withDomLvl1: false,
+  })
+  return $.text().split(' ').length
 }
