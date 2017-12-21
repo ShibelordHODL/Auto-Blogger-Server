@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio'
+import * as googleTranslate from 'google-translate-api'
 import * as sanitizeHtml from 'sanitize-html'
 
 const sanitizeConfigs: object = {
@@ -124,4 +125,44 @@ export function wordCount(content: string) {
     withDomLvl1: false,
   })
   return $.text().split(' ').length
+}
+
+function sliceString(content, size = 5000) {
+  if (size < 100) {
+    size = 100
+  }
+  let currentString = content
+  const chunks = []
+
+  while (currentString.length > size) {
+    const lastSentenceIndex = (currentString.substring(0, size).lastIndexOf('.') > 0)
+      ? currentString.substring(0, size).lastIndexOf('.') + 1
+      : currentString.substring(0, size).lastIndexOf(' ') + 1
+    chunks.push(currentString.substring(0, lastSentenceIndex))
+    currentString = (currentString.length > size)
+      ? currentString.slice(lastSentenceIndex - currentString.length)
+      : currentString
+  }
+  chunks.push(currentString)
+  // const re = new RegExp('.{1,' + size + '}', 'g')
+  // const chunks: any = content.match(re)
+  return chunks
+}
+
+export async function localTranslate(rawArticle: string) {
+  const results = []
+  await Promise.all(sliceString(rawArticle).map(async (chunkArticle: string) => {
+    const result = await googleTranslate(chunkArticle, { from: 'auto', to: 'en', raw: true })
+      .then((res) => res.text).catch((err) => {
+        console.log('hhh')
+        console.error(err)
+      })
+    results.push(result)
+  }))
+  return results.join()
+  // return await googleTranslate(rawArticle, { from: 'auto', to: 'en', raw: true })
+  //   .then((res) => res.text).catch((err) => {
+  //     console.log('hhh')
+  //     console.error(err)
+  //   })
 }
