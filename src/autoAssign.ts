@@ -10,6 +10,7 @@ interface IEventData {
   days: number
   dateOffset: number
   concurrent: number
+  postLimit: number
 }
 
 interface IResponse {
@@ -33,14 +34,19 @@ export default async (event: FunctionEvent<IEventData>) => {
   try {
     const graphcool = fromEvent(event)
     const api = graphcool.api('simple/v1')
-    const { siteId, days, dateOffset, concurrent = 10 } = event.data
+    const { siteId, days, dateOffset, concurrent = 10, postLimit } = event.data
     const site: ISite = await getSite(api, siteId)
     const success = []
     const fail: IFail[] = []
 
     const startDate = offsetDate(new Date(), dateOffset)
     for (const siteCategory of site.categories) {
-      const articles: [IArticle] = await getArticles(api, siteCategory.category.id, siteCategory.limitPost * days)
+      const limit = (postLimit) ? postLimit : siteCategory.limitPost
+      const articles: [IArticle] = await getArticles(
+        api,
+        siteCategory.category.id,
+        limit * days,
+      )
       let chunkIndex = 0
       for (const chunks of sliceArray(articles, concurrent)) {
         await Promise.all(chunks.map(async (article: IArticle, i: number) => {
@@ -54,7 +60,7 @@ export default async (event: FunctionEvent<IEventData>) => {
               siteId,
               siteCategory.id,
               STATUS.TRANSLATING,
-              offsetDate(startDate, Math.floor((i + (chunkIndex * concurrent)) / siteCategory.limitPost)),
+              offsetDate(startDate, Math.floor((i + (chunkIndex * concurrent)) / limit)),
             )
             success.push(response)
 
