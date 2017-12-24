@@ -2,6 +2,8 @@ import * as cheerio from 'cheerio'
 import * as googleTranslate from 'google-translate-api'
 import * as sanitizeHtml from 'sanitize-html'
 
+import { decode } from 'ent'
+
 const sanitizeConfigs: object = {
   allowedTags: [
     'h1',
@@ -39,12 +41,12 @@ const sanitizeConfigs: object = {
   ],
   allowedAttributes: {
     a: ['href', 'name', 'target', 'rel'],
+    article: ['*'],
     // We don't currently allow img itself by default, but this
     // would make sense if we did
     img: ['src', 'alt'],
     meta: ['*'],
     // link: ['*'],
-    article: ['*'],
     figure: ['*'],
     // span: ['class'],
     // div: ['class']
@@ -55,12 +57,21 @@ const sanitizeConfigs: object = {
   allowedSchemes: ['http', 'https', 'ftp', 'mailto'],
   allowedSchemesByTag: {},
   allowProtocolRelative: true,
+  // parser: {
+  //   decodeEntities: false,
+  //   lowerCaseTags: true,
+  // },
 }
 
 export function cleanPageHTML(d) {
-  // var sanitizeHtml = require('sanitize-html');
   const c = sanitizeHtml(d, (sanitizeConfigs))
   return c
+}
+
+export function decodeHtmlEntity(str) {
+  // const clean = str.replace(/&#x([a-fA-F0-9]+);/g, (match, dec) => String.fromCharCode(parseInt('0x' + dec, 16)))
+  // return clean
+  return decode(str + '')
 }
 
 export function replaceImages(html) {
@@ -106,9 +117,6 @@ function cleanImageURL(source) {
   if (url && url.indexOf('%') > 0) {
     url = url.substr(0, url.indexOf('%'))
   }
-  // if (url && url.indexOf('?') > 0) {
-  //   url = url.substr(0, url.indexOf('?'))
-  // }
   return url
 }
 
@@ -149,20 +157,18 @@ function sliceString(content, size = 5000) {
   return chunks
 }
 
+export function fixLocalTranslateOutput(content: string) {
+  return content.replace(/<.?\/ /g, '</').replace(/<.?/g, '<')
+}
+
 export async function localTranslate(rawArticle: string) {
   const results = []
-  await Promise.all(sliceString(rawArticle).map(async (chunkArticle: string) => {
-    const result = await googleTranslate(chunkArticle, { from: 'auto', to: 'en', raw: true })
+  await Promise.all(sliceString(rawArticle).map(async (chunkArticle: string, index: number) => {
+    const result = await googleTranslate(chunkArticle, { from: 'auto', to: 'en', raw: false })
       .then((res) => res.text).catch((err) => {
-        console.log('hhh')
         console.error(err)
       })
-    results.push(result)
+    results.splice(index, 0, fixLocalTranslateOutput(result))
   }))
   return results.join()
-  // return await googleTranslate(rawArticle, { from: 'auto', to: 'en', raw: true })
-  //   .then((res) => res.text).catch((err) => {
-  //     console.log('hhh')
-  //     console.error(err)
-  //   })
 }
