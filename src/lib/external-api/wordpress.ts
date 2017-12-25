@@ -58,6 +58,7 @@ export async function uploadArticle(site: ISite, article: IArticle, imageId: num
     }
     const FormData = require('form-data')
     const data = new FormData()
+    data.append('excerpt', article.excerpt)
     data.append('title', article.title)
     data.append('content', content)
     data.append('featured_media', imageId)
