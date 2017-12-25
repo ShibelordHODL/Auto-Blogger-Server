@@ -20,8 +20,10 @@ export default async (event) => {
     const url = job.url
     const extract = await extractArticle(url)
     const title = await localTranslate(decodeHtmlEntity(extract.title))
+    const excerpt = await localTranslate(decodeHtmlEntity(extract.excerpt))
     const replaceData = replaceImages(cleanPageHTML(extract.content))
     const articleData = {
+      excerpt,
       images: [...replaceData.images, {
         ref: 'i_m',
         source: extract.lead_image_url,
@@ -58,12 +60,12 @@ async function updateJob(
 ): Promise<IJob> {
   const mutation = `
     mutation insertExtractedData(
-      $jobId: ID!, $articleId: ID!, $images: [ArticleimagesImage!],
+      $jobId: ID!, $articleId: ID!, $excerpt: String, $images: [ArticleimagesImage!],
       $publishedDate: DateTime, $title: String, $url: String,
       $rawArticle: String, $wordCount: Int, $status: STATUS
     ){
       updateArticle(
-        id: $articleId, images: $images, publishedDate: $publishedDate,
+        id: $articleId, excerpt: $excerpt, images: $images, publishedDate: $publishedDate,
         status: $status, title: $title, url: $url, wordCount: $wordCount
       ){
         id
@@ -82,6 +84,7 @@ async function updateJob(
   `
   const variables = {
     articleId,
+    excerpt: articleData.excerpt,
     images: articleData.images,
     jobId,
     publishedDate: articleData.publishedDate,
