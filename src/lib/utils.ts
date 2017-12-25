@@ -158,7 +158,8 @@ function sliceString(content, size = 5000) {
 }
 
 export function fixLocalTranslateOutput(content: string) {
-  return content.replace(/<.?\/ /g, '</').replace(/<.?/g, '<')
+  // return content.replace(/<.?\/ /g, '</').replace(/<.?/g, '<')
+  return content.replace(/< ?\/? /g, '</')
 }
 
 export async function localTranslate(rawArticle: string) {
