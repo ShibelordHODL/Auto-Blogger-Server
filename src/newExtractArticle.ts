@@ -4,7 +4,7 @@ import { extractArticle } from './lib/external-api/mercury'
 import { getJob } from './lib/graphUtils'
 import { IArticle, IJob, STATUS } from './lib/interface'
 import { localTranslate } from './lib/utils'
-import { cleanPageHTML, replaceImages, wordCount } from './lib/utils'
+import { cleanPageHTML, decodeHtmlEntity, replaceImages, wordCount } from './lib/utils'
 
 export interface IEventData {
   jobId: string
@@ -19,8 +19,7 @@ export default async (event) => {
     const job: IJob = await getJob(api, jobId)
     const url = job.url
     const extract = await extractArticle(url)
-    const title = await localTranslate(extract.title)
-
+    const title = await localTranslate(decodeHtmlEntity(extract.title))
     const replaceData = replaceImages(cleanPageHTML(extract.content))
     const articleData = {
       images: [...replaceData.images, {
@@ -34,7 +33,7 @@ export default async (event) => {
       wordCount: wordCount(extract.content),
     }
     const updateResponse: IJob = await updateJob(
-      api, jobId, job.article.id, articleData, replaceData.html, STATUS.ASSIGNING,
+      api, jobId, job.article.id, articleData, decodeHtmlEntity(replaceData.html), STATUS.ASSIGNING,
     )
 
     return {
